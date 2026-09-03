@@ -1,0 +1,1427 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ACI-G — Atualização LFS(9) —  Protótipo Atualizado Consolidado LF — Agosto 2026</title>
+<style>
+:root{--ink:#142033;--muted:#6c7788;--line:#e6eaf0;--card:#fff;--bg:#f5f7fb;--navy:#143866;--blue:#2368d1;--blue2:#eaf2ff;--green:#12805c;--amber:#b87200;--red:#a72b24;--shadow:0 10px 35px rgba(22,38,65,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}
+.appbar{height:74px;background:linear-gradient(120deg,#102f58,#1a4f8e);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20;box-shadow:0 4px 20px #102f5830}
+.brand{display:flex;gap:13px;align-items:center}.logo{width:42px;height:42px;border-radius:13px;background:#fff1;display:grid;place-items:center;font-size:22px;border:1px solid #ffffff2e}.brand h1{font-size:18px;margin:0}.brand p{font-size:12px;margin:3px 0 0;opacity:.82}.live{display:flex;align-items:center;gap:9px;background:#ffffff14;border:1px solid #ffffff25;padding:9px 13px;border-radius:999px;font-size:13px}.dot{width:8px;height:8px;border-radius:50%;background:#3ce2a0;box-shadow:0 0 0 6px #3ce2a022}
+.shell{display:grid;grid-template-columns:245px minmax(0,1fr) 285px;min-height:calc(100vh - 74px)}.sidebar,.context{background:#fff;border-right:1px solid var(--line);position:sticky;top:74px;height:calc(100vh - 74px);overflow:auto}.context{border-right:0;border-left:1px solid var(--line);padding:20px}.sidebar{padding:18px 13px}
+.sidebar-title{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:4px 10px 12px}.step{width:100%;border:0;background:transparent;display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;color:#4d596a;text-align:left;cursor:pointer;margin:2px 0}.step:hover{background:#f4f7fb}.step.active{background:var(--blue2);color:var(--navy);font-weight:700}.step.done .step-index{background:#dcf8ed;color:var(--green)}.step-index{width:29px;height:29px;border-radius:9px;background:#eef1f5;display:grid;place-items:center;font-size:13px;flex:0 0 auto}.step-text{font-size:13px;line-height:1.2}
+.workspace{padding:24px 30px 110px;max-width:1080px;width:100%;margin:auto}.casebar{background:#fff;border:1px solid var(--line);border-radius:16px;padding:15px 18px;display:flex;justify-content:space-between;gap:18px;box-shadow:var(--shadow);margin-bottom:18px}.casebar strong{font-size:14px}.casebar span{font-size:12px;color:var(--muted)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}.metric{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px 16px}.metric-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.metric-value{font-size:21px;font-weight:800;margin-top:5px}.progressline{height:6px;background:#edf0f4;border-radius:99px;margin-top:9px;overflow:hidden}.progressline>div{height:100%;background:linear-gradient(90deg,#2368d1,#27a477)}
+.stage{display:none}.stage.active{display:block}.stage-head{margin:4px 0 18px}.stage-kicker{color:var(--blue);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em}.stage h2{margin:5px 0 0;font-size:27px}.stage-note{color:var(--muted);font-size:13px;margin-top:6px;max-width:760px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:19px 20px;margin:12px 0;box-shadow:0 3px 15px rgba(22,38,65,.04);transition:.2s}.card:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.card.missing{border-color:#f2a29c;box-shadow:0 0 0 3px #f0443820}.question{font-size:15px;font-weight:750;line-height:1.4}.question .num{display:inline-grid;place-items:center;min-width:31px;height:25px;border-radius:8px;background:var(--blue2);color:var(--blue);font-size:11px;margin-right:7px}.question .req{color:var(--red)}.hint{font-size:11px;color:var(--muted);margin-top:4px}
+.options{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}.option{border:1px solid #cfd6df;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;color:#354052;transition:.15s}.option:hover{border-color:#8fb2e5;background:#f8fbff}.option.selected{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 5px 14px #2368d12d}
+.field,textarea,select{width:100%;border:1px solid #cfd6df;border-radius:12px;padding:11px 12px;margin-top:12px;background:#fff;outline:none}.field:focus,textarea:focus,select:focus{border-color:#68a0e7;box-shadow:0 0 0 4px #2368d115}textarea{min-height:90px;resize:vertical}.subgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:11px}.subgrid input{width:100%;border:1px solid #cfd6df;border-radius:10px;padding:9px}
+.igac-live{background:#ffffff20;border-color:#ffffff45;min-width:150px;justify-content:center}.igac-live b{font-size:11px;letter-spacing:.08em}.igac-live span{font-size:15px;font-weight:850}.igac-live small{font-size:10px;opacity:.85}
+.city-wrap{position:relative}.city-status{font-size:11px;color:var(--muted);margin-top:7px}.city-list{position:absolute;left:0;right:0;top:100%;z-index:40;background:#fff;border:1px solid #cfd6df;border-radius:12px;box-shadow:var(--shadow);max-height:240px;overflow:auto;display:none}.city-list.open{display:block}.city-item{padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f2f5}.city-item:hover{background:var(--blue2)}
+.spell-tools{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.spell-btn{border:1px solid #cfd6df;background:#fff;border-radius:9px;padding:7px 10px;cursor:pointer;font-size:11px;font-weight:700;color:var(--blue)}
+.spell-status{font-size:11px;color:var(--muted)}
+.spell-panel{margin-top:9px;border:1px solid #d9e2ef;background:#f8fbff;border-radius:11px;padding:10px;display:none}
+.spell-panel.open{display:block}.spell-issue{padding:8px 0;border-bottom:1px solid #e7edf5}.spell-issue:last-child{border-bottom:0}
+.spell-word{font-weight:800;color:var(--red)}.spell-suggestions{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.spell-suggestion{border:1px solid #aac6ea;background:#fff;color:var(--blue);border-radius:8px;padding:5px 8px;cursor:pointer;font-size:11px}
+.city-retry{border:0;background:transparent;color:var(--blue);font-weight:750;cursor:pointer;padding:0 3px}
+.law-group{border:1px solid #d9e2ef;border-radius:13px;padding:12px;margin-top:10px;background:#fafcff}.law-group-title{font-weight:800;color:var(--navy);font-size:12px;margin-bottom:8px}.law-choice{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:9px}.law-choice:hover{background:var(--blue2)}.action-card{background:linear-gradient(135deg,#eaf2ff,#fff);border:1px solid #cfe0fa}.action-card .generate{margin-top:15px;border:0;background:var(--blue);color:#fff;border-radius:13px;padding:13px 18px;font-weight:800;cursor:pointer}
+.actions{position:fixed;bottom:0;left:245px;right:285px;padding:13px 28px;background:#ffffffeb;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;justify-content:space-between;z-index:15}.btn{border:1px solid #cfd6df;border-radius:12px;padding:10px 15px;background:#fff;cursor:pointer;font-weight:650}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btnrow{display:flex;gap:8px}
+.context h3{font-size:14px;margin:0 0 14px}.guarantee{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0f2f5}.gicon{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;background:#eef1f5;color:#8b95a3}.guarantee.ok .gicon{background:#dcf8ed;color:var(--green)}.guarantee.warn .gicon{background:#fff1d5;color:var(--amber)}.gtext{font-size:12px;line-height:1.3}.gtext b{display:block;font-size:12px}.context-box{background:#f7f9fc;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:18px}.context-box .big{font-size:24px;font-weight:850;color:var(--navy)}.small{font-size:11px;color:var(--muted)}
+.modal{display:none;position:fixed;inset:0;background:#0c1c33aa;z-index:50;padding:28px;overflow:auto}.modal.open{display:block}.modal-card{max-width:920px;margin:30px auto;background:#fff;border-radius:22px;padding:25px;box-shadow:0 30px 80px #0004}.modal-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding-bottom:14px}.close{border:0;background:#eef1f5;width:34px;height:34px;border-radius:10px;cursor:pointer}.output{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);border-radius:14px;padding:16px;line-height:1.5;min-height:220px}
+@media(max-width:1100px){.shell{grid-template-columns:220px 1fr}.context{display:none}.actions{left:220px;right:0}}@media(max-width:760px){.shell{display:block}.sidebar{position:static;height:auto}.sidebar .step{display:none}.sidebar .step.active{display:flex}.workspace{padding:18px 14px 100px}.metrics{grid-template-columns:1fr 1fr}.actions{left:0}.casebar{display:block}.subgrid{grid-template-columns:1fr 1fr}}
+@media print{.appbar,.sidebar,.context,.actions,.metrics{display:none}.shell{display:block}.workspace{padding:0}.stage{display:block!important}.card{break-inside:avoid;box-shadow:none}}
+
+.pending-metric{cursor:pointer;position:relative;transition:transform .15s ease,box-shadow .15s ease}
+.pending-metric:hover,.pending-metric:focus{transform:translateY(-1px);box-shadow:0 0 0 2px rgba(32,86,160,.12);outline:none}
+.pending-metric.pending-clear{cursor:default;opacity:.82}
+.pending-help{font-size:10px;margin-top:3px;opacity:.68;font-weight:600}
+.card.pending-focus{animation:pendingPulse 1.6s ease;box-shadow:0 0 0 3px rgba(181,112,17,.23)}
+@keyframes pendingPulse{0%,100%{transform:translateY(0)}35%{transform:translateY(-2px)}}
+.output.rich-output{white-space:normal;line-height:1.65}
+.output.rich-output p{margin:0 0 1em 0}
+.output.rich-output .ata-title{font-weight:800;text-align:center;margin-bottom:1.2em}
+.output.rich-output strong.ata-highlight{font-weight:900}
+
+
+.repo-modal-card{width:min(1180px,96vw);max-height:92vh;overflow:auto}
+.repo-grid{display:grid;grid-template-columns:290px 1fr;gap:16px}
+.repo-sidebar{border-right:1px solid var(--line);padding-right:14px}
+.repo-choice{display:block;width:100%;text-align:left;margin:0 0 7px;padding:10px 11px;border:1px solid var(--line);border-radius:10px;background:var(--surface);cursor:pointer;font-size:12px;line-height:1.35}
+.repo-choice:hover,.repo-choice.active{border-color:var(--accent);box-shadow:0 0 0 2px rgba(32,86,160,.08)}
+.repo-choice:disabled{cursor:not-allowed;opacity:.62}
+.repo-editor-area{min-width:0}
+.repo-status{font-size:12px;font-weight:700;margin-bottom:8px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--surface)}
+.repo-editor{width:100%;min-height:58vh;resize:vertical;border:1px solid var(--line);border-radius:10px;padding:14px;font:14px/1.6 Georgia,'Times New Roman',serif;background:#fff;color:#111;box-sizing:border-box}
+.repo-editor:disabled{background:#f3f4f6;color:#333;cursor:not-allowed}
+.repo-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.repo-published{border-color:#2e7d32!important;background:#edf7ee!important;color:#205a24}
+@media(max-width:860px){.repo-grid{grid-template-columns:1fr}.repo-sidebar{border-right:0;border-bottom:1px solid var(--line);padding-right:0;padding-bottom:10px}.repo-editor{min-height:48vh}}
+
+
+.published-readonly{
+  background:#f7f8fa!important;
+  color:#111!important;
+  cursor:text!important;
+  border:1px solid var(--line)!important;
+  user-select:text!important;
+  -webkit-user-select:text!important;
+}
+.published-readonly:focus{
+  outline:none;
+  box-shadow:0 0 0 2px rgba(32,86,160,.08);
+}
+
+
+.published-document{
+  min-height:58vh;
+  white-space:pre-wrap;
+  overflow:auto;
+  font:14px/1.65 Georgia,'Times New Roman',serif;
+  user-select:text!important;
+  -webkit-user-select:text!important;
+  cursor:text!important;
+}
+.published-document:focus{
+  outline:none;
+  box-shadow:0 0 0 2px rgba(32,86,160,.08);
+}
+
+
+.output.ata-editable{
+  min-height:52vh;
+  max-height:68vh;
+  overflow:auto;
+  white-space:normal;
+  cursor:text;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:18px;
+  outline:none;
+}
+.output.ata-editable:focus{
+  box-shadow:0 0 0 2px rgba(32,86,160,.10);
+}
+.ata-edit-notice{
+  margin:0 0 12px 0;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#f7f8fa;
+  font-size:12px;
+  color:var(--muted);
+}
+.ata-participants{
+  margin:10px 0 14px 0;
+  line-height:1.7;
+}
+
+</style></head><body>
+<header class="appbar"><div class="brand"><div class="logo">⚖️</div><div><h1>ACI-G</h1><p>Audiência de Custódia Inteligente e Garantista — legislação penal simultânea</p></div></div><div style="display:flex;gap:10px;align-items:center"><div class="live igac-live" title="IGAC: pontos garantistas alcançados divididos apenas pelas garantias aplicáveis à audiência concreta. Variáveis cadastrais e respostas identitárias não alteram a pontuação."><b>IGAC</b><span id="igacTop">0,0%</span><small id="igacCount">0/0</small></div><div class="live"><span class="dot"></span> Em audiência <span id="clock"></span></div></div></header>
+<div class="shell"><nav class="sidebar"><div class="sidebar-title">Sequência oficial</div><div id="steps"></div></nav>
+<main class="workspace"><div class="casebar"><div><strong id="caseProcess">Processo ainda não informado</strong><br><span id="caseCourt">Comarca e unidade pendentes</span></div><div><strong id="caseCrime">Tipificação ainda não selecionada</strong><br><span id="casePrison">Tipo de prisão pendente</span></div></div>
+<div class="metrics"><div class="metric"><div class="metric-label">Conclusão</div><div class="metric-value" id="percent">0%</div><div class="progressline"><div id="progress" style="width:0"></div></div></div><div class="metric"><div class="metric-label">Tempo</div><div class="metric-value" id="elapsed">00:00</div></div><div class="metric"><div class="metric-label">IGAC operacional</div><div class="metric-value" id="score">0,0%</div></div><div class="metric pending-metric" id="pendingMetric" role="button" tabindex="0" title="Clique para ir à primeira pendência"><div class="metric-label">Pendências</div><div class="metric-value" id="pending">0</div><div class="pending-help" id="pendingHelp">Clique para revisar</div></div></div><div id="stages"></div></main>
+<aside class="context"><h3>Garantias essenciais</h3><div id="guarantees"></div><div class="context-box"><div class="small">ETAPA ATUAL</div><div class="big" id="currentName">Abertura</div></div><div class="context-box"><div class="small">ALERTA ATIVO</div><div id="alertText" style="font-size:12px;margin-top:6px">Nenhum alerta crítico.</div></div></aside></div>
+<div class="actions"><div class="btnrow"><button class="btn" onclick="prev()">← Anterior</button><button class="btn" onclick="saveLocal()">Salvar sessão</button></div><div class="btnrow"><button class="btn" onclick="generateReport()">Gerar relatório</button><button class="btn" onclick="generateBNMPReport()">Gerar relatório BNMP</button><button class="btn" onclick="generateHearingMinutes()">Gerar termo de audiência</button><button class="btn" onclick="openDecisionRepository()">Decisão – Repositório</button><button class="btn" onclick="generateDecision()">Gerar decisão</button><button class="btn primary" onclick="next()">Próxima etapa →</button></div></div>
+
+
+<div class="modal" id="publishedDecisionModal">
+  <div class="modal-card repo-modal-card">
+    <div class="modal-head">
+      <h2>Decisão Publicada</h2>
+      <button class="close" onclick="closePublishedDecision()">×</button>
+    </div>
+
+    <div class="repo-status repo-published">
+      TEXTO DEFINITIVO — não editável
+    </div>
+
+    <div id="publishedDecisionText" class="repo-editor published-readonly published-document" role="document" aria-readonly="true" tabindex="0"></div>
+
+    <div class="repo-actions">
+      <button class="btn" onclick="copyPublishedDecision()">Copiar</button>
+      <button class="btn" onclick="openPublishedDecisionPDF()">Abrir PDF</button>
+    </div>
+
+    <div class="hint" style="margin-top:8px">
+      Esta é a versão definitivamente publicada e salva dentro da ACI-G. O conteúdo pode ser consultado, selecionado, copiado e aberto em PDF, mas não pode ser alterado.
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="repoModal">
+  <div class="modal-card repo-modal-card">
+    <div class="modal-head">
+      <h2>Decisão – Repositório</h2>
+      <button class="close" onclick="closeDecisionRepository()">×</button>
+    </div>
+
+    <div class="repo-grid">
+      <div class="repo-sidebar">
+        <div class="small" style="margin-bottom:8px">MODELOS DISPONÍVEIS</div>
+        <div id="repoChoices"></div>
+      </div>
+      <div class="repo-editor-area">
+        <div class="repo-status" id="repoStatus">Selecione DR1 a DR8.</div>
+        <textarea id="repoEditor" class="repo-editor" spellcheck="true" placeholder="O texto da decisão aparecerá aqui para edição."></textarea>
+        <div class="repo-actions">
+          <button class="btn" id="repoRefreshBtn" onclick="reloadRepositoryModel()">Recarregar modelo</button>
+          <button class="btn" id="repoNewModelBtn" onclick="includeNewRepositoryModel()" style="display:none">Incluir novo modelo</button>
+          <button class="btn" onclick="copyRepositoryDecision()">Copiar</button>
+          <button class="btn" id="repoPdfBtn" onclick="openPublishedRepositoryPDF()" style="display:none">Abrir PDF</button>
+          <button class="btn primary" id="repoPublishBtn" onclick="publishRepositoryDecision()">Publicar</button>
+        </div>
+        <div class="hint" style="margin-top:8px">
+          Antes da publicação, o texto pode ser livremente editado. Depois de publicado, o conteúdo é bloqueado contra novas alterações, permanece copiável e pode ser reaberto em PDF.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="outputModal"><div class="modal-card"><div class="modal-head"><h2 id="outputTitle">Documento</h2><button class="close" onclick="outputModal.classList.remove('open')">×</button></div><div class="output" id="output"></div><div style="margin-top:12px"><button class="btn" onclick="copyCurrentOutput()">Copiar</button><button class="btn" onclick="exportJSON()">Exportar JSON</button><button class="btn primary" onclick="sealSession()">Lacrar sessão</button></div></div></div>
+<script>
+const schema={"sections": [{"id": "processo", "title": "1. Abertura, processo e tipificação", "icon": "⚖️"}, {"id": "estrutura", "title": "2. Estrutura e formato da audiência", "icon": "🎥"}, {"id": "garantias", "title": "3. Garantias iniciais", "icon": "🛡️"}, {"id": "qualificacao", "title": "4. Qualificação e situação pessoal", "icon": "👤"}, {"id": "saude", "title": "5. Saúde e vulnerabilidades", "icon": "❤️"}, {"id": "prisao", "title": "6. Momento da prisão", "icon": "📍"}, {"id": "violencia", "title": "7. Violência, maus-tratos e tortura", "icon": "🚨"}, {"id": "exame", "title": "8. Exame de corpo de delito e condução", "icon": "🩺"}, {"id": "delegacia", "title": "9. Delegacia e direitos", "icon": "🏛️"}, {"id": "partes", "title": "10. Perguntas e manifestações das partes", "icon": "💬"}, {"id": "decisao", "title": "11. Decisão judicial", "icon": "📄"}, {"id": "documentos", "title": "12. Relatório, decisão automática e encerramento", "icon": "✅"}], "fields": [{"id": "q1", "n": 1, "label": "Abrir a audiência e permitir entrevista prévia e reservada com advogado", "type": "choice", "options": ["Realizado"], "section": "processo", "required": true, "placeholder": ""}, {"id": "q2", "n": 2, "label": "Número completo do processo", "type": "text", "options": [], "section": "processo", "required": true, "placeholder": "0000000-00.0000.0.00.0000", "bnmp": true}, {"id": "q2_doc_policial", "n": "2.1", "label": "Número do documento da Polícia", "type": "text", "options": [], "section": "processo", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q2_data_doc_policial", "n": "2.2", "label": "Data e horário do registro do documento na delegacia", "type": "datetime-local", "options": [], "section": "processo", "required": true, "placeholder": "__/__/____ às __:__", "bnmp": true}, {"id": "q3", "n": 3, "label": "Legislação", "type": "choice", "options": ["Código Penal", "Legislação penal especial", "Ambas"], "section": "processo", "required": true, "placeholder": "", "help": "Pesquisa automática de legislação no Portal da Legislação da Presidência da República. Digite o número, ano ou nome da lei; a consulta deve ocorrer dentro da ACI-G, sem abrir nova página."}, {"id": "q4", "n": 4, "label": "Legislação Penal — selecione simultaneamente o Código Penal e/ou as legislações penais especiais aplicáveis", "type": "lawmulti", "options": [], "section": "processo", "required": true, "placeholder": ""}, {"id": "q5", "n": 5, "label": "Tipos penais — cadastrar até cinco enquadramentos vinculados ao Código Penal e/ou às legislações especiais selecionadas", "type": "criminalmulti", "options": [], "section": "processo", "required": true, "placeholder": "", "help": "Para o Código Penal, a ACI-G permite pesquisar artigos diretamente no texto oficial do Planalto. O catálogo interno permanece como contingência."}, {"id": "q6", "n": 6, "label": "Comarca", "type": "select", "options": ["Abadiânia", "Acreúna", "Águas Lindas de Goiás", "Alexânia", "Alto Paraíso de Goiás", "Alvorada do Norte", "Anápolis", "Anicuns", "Aparecida de Goiânia", "Araçu", "Aragarças", "Aruanã", "Aurilândia", "Barro Alto", "Bela Vista de Goiás", "Bom Jesus", "Buriti Alegre", "Cachoeira Alta", "Caçu", "Caiapônia", "Caldas Novas", "Campinorte", "Campos Belos", "Catalão", "Cavalcante", "Ceres", "Cidade Ocidental", "Cocalzinho de Goiás", "Corumbá de Goiás", "Corumbaíba", "Cristalina", "Crixás", "Edéia", "Estrela do Norte", "Fazenda Nova", "Firminópolis", "Flores de Goiás", "Formosa", "Formoso", "Goianápolis", "Goiandira", "Goianésia", "Goiânia", "Goianira", "Goiás", "Goiatuba", "Guapó", "Hidrolândia", "Iaciara", "Inhumas", "Ipameri", "Iporá", "Itaberaí", "Itajá", "Itapaci", "Itapirapuã", "Itapuranga", "Itauçu", "Itumbiara", "Jandaia", "Jaraguá", "Jataí", "Joviânia", "Jussara", "Leopoldo de Bulhões", "Luziânia", "Mara Rosa", "Maurilândia", "Minaçu", "Mineiros", "Montes Claros de Goiás", "Montividiu", "Morrinhos", "Mossâmedes", "Mozarlândia", "Nazário", "Nerópolis", "Niquelândia", "Nova Crixás", "Novo Gama", "Orizona", "Padre Bernardo", "Palmeiras de Goiás", "Paranaiguara", "Paraúna", "Petrolina de Goiás", "Piracanjuba", "Piranhas", "Pirenópolis", "Pires do Rio", "Planaltina", "Pontalina", "Porangatu", "Posse", "Quirinópolis", "Rialma", "Rio Verde", "Rubiataba", "Sanclerlândia", "Santa Cruz de Goiás", "Santa Helena de Goiás", "Santa Terezinha de Goiás", "Santo Antônio do Descoberto", "São Domingos", "São Luís de Montes Belos", "São Miguel do Araguaia", "São Simão", "Senador Canedo", "Serranópolis", "Silvânia", "Taquaral de Goiás", "Trindade", "Turvânia", "Uruaçu", "Uruana", "Valparaíso de Goiás", "Varjão", "Vianópolis"], "section": "processo", "required": true, "placeholder": ""}, {"id": "q7", "n": 7, "label": "Unidade judiciária", "type": "text", "options": [], "section": "processo", "required": true, "placeholder": "", "bnmp": true}, {"id": "q8", "n": 8, "label": "Data e horário da audiência", "type": "datetime-local", "options": [], "section": "processo", "required": true, "placeholder": "dd/mm/aaaa — 00:00 horas"}, {"id": "q9", "n": 9, "label": "Entrância da unidade", "type": "choice", "options": ["Inicial", "Intermediária", "Final"], "section": "processo", "required": true, "placeholder": ""}, {"id": "q10", "n": 10, "label": "Juiz(a) responsável", "type": "choice", "options": ["Titular", "Substituto", "Auxiliar"], "section": "processo", "required": true, "placeholder": ""}, {"id": "q10_nome", "n": "10.1", "label": "Nome do(a) juiz(a) responsável", "type": "text", "options": [], "section": "processo", "required": true, "placeholder": "Espaço para escrever o nome do(a) juiz(a)", "bnmp": true}, {"id": "q12", "n": "11", "label": "Gênero do julgador", "type": "choice", "options": ["Masculino", "Feminino"], "section": "processo", "required": false, "placeholder": ""}, {"id": "q14", "n": "12", "label": "Tipo de audiência de custódia ou prisão", "type": "choice", "options": ["Prisão em flagrante (APF)", "Cumprimento de mandado", "Prisão temporária", "Prisão preventiva", "Prisão civil", "Outro tipo de audiência"], "section": "processo", "required": true, "placeholder": "", "bnmp": true}, {"id": "q15", "n": "13", "label": "Formato da audiência", "type": "choice", "options": ["Presencial", "Videoconferência", "Telepresencial"], "section": "estrutura", "required": true, "placeholder": "", "bnmp": true}, {"id": "q16", "n": "14", "label": "Onde o(a) custodiado(a) se encontrava no momento da audiência?", "type": "choice", "options": ["Sala de audiência", "Delegacia", "Presídio", "Casa do Albergado", "Hospital", "Sala passiva de outro juízo", "Outro local"], "section": "estrutura", "required": true, "placeholder": ""}, {"id": "q17", "n": "15", "label": "O(a) juiz(a) estava na sala de audiência?", "type": "choice", "options": ["Sim", "Não"], "section": "estrutura", "required": true, "placeholder": ""}, {"id": "q18", "n": "16", "label": "O(a) promotor(a) de justiça estava na sala de audiência?", "type": "choice", "options": ["Sim", "Não"], "section": "estrutura", "required": true, "placeholder": ""}, {"id": "q18_nome", "n": "16.1", "label": "Nome do(a) Promotor(a) de Justiça", "type": "text", "options": [], "section": "estrutura", "required": false, "placeholder": "Espaço para escrever o nome do(a) Promotor(a) de Justiça", "bnmp": true}, {"id": "q19", "n": "17", "label": "O(a) defensor(a) estava na sala de audiência?", "type": "choice", "options": ["Sim", "Não"], "section": "estrutura", "required": true, "placeholder": ""}, {"id": "q19_nome", "n": "17.1", "label": "Nome do(a) Defensor(a)", "type": "text", "options": [], "section": "estrutura", "required": false, "placeholder": "Espaço para escrever o nome do(a) Defensor(a)", "bnmp": true}, {"id": "q20", "n": "18", "label": "Se videoconferência ou telepresencial, justificativa", "type": "choice", "options": ["Calamidade pública", "Crise sanitária", "Projeto do Tribunal para realizar audiência de custódia", "Impossibilidade manifesta de apresentação presencial no prazo legal", "Juiz de garantias", "Outra justificativa", "Sem justificativa"], "section": "estrutura", "required": false, "placeholder": "", "bnmp": true}, {"id": "q21", "n": "19", "label": "Local e câmeras estão em conformidade com a regulamentação do CNJ?", "type": "choice", "options": ["Sim, local e câmera em conformidade", "Não, local ou câmera em desconformidade"], "section": "estrutura", "required": true, "placeholder": ""}, {"id": "q24", "n": "20", "label": "A audiência havia sido designada como presencial?", "type": "choice", "options": ["Sim", "Não"], "section": "estrutura", "required": false, "placeholder": ""}, {"id": "q25", "n": "21", "label": "Existiam policiais militares na sala fazendo a segurança do juiz?", "type": "choice", "options": ["Sim", "Não"], "section": "estrutura", "required": false, "placeholder": ""}, {"id": "q26", "n": "22", "label": "Gênero do policial penal que conduziu o custodiado", "type": "choice", "options": ["Masculino", "Feminino", "Homens e mulheres", "Não informado"], "section": "estrutura", "required": false, "placeholder": ""}, {"id": "q28", "n": "23", "label": "A defesa foi exercida por", "type": "choice", "options": ["Advogado particular", "Advogado dativo", "Defensor público"], "section": "garantias", "required": true, "placeholder": "", "bnmp": true}, {"id": "q29", "n": "24", "label": "Quem realizou a qualificação inicial?", "type": "choice", "options": ["Juiz", "Assessor", "Outro servidor"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q22", "n": "25", "label": "O(a) custodiado(a) foi apresentado(a) em até 24 horas da prisão?", "type": "choice", "options": ["Sim", "Não — justificou", "Não — não justificou"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q30_tradutor", "n": "26", "label": "Há necessidade de tradutor?", "type": "choice", "options": ["Sim", "Não"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q30_idioma", "n": "26.1", "label": "Qual o idioma falado pelo(a) custodiado(a)?", "type": "text", "options": [], "section": "garantias", "required": true, "placeholder": "Digite o idioma falado pelo(a) custodiado(a)", "bnmp": true}, {"id": "q30_interprete", "n": "27", "label": "Há necessidade de intérprete?", "type": "choice", "options": ["Sim", "Não"], "section": "garantias", "required": true, "placeholder": "", "help": "Registre se há necessidade de intérprete para assegurar a compreensão e a comunicação durante a audiência."}, {"id": "q30_interprete_tipo", "n": "27.1", "label": "Qual o intérprete necessário?", "type": "text", "options": [], "section": "garantias", "required": true, "placeholder": "Digite o intérprete necessário", "bnmp": true, "help": "Campo condicionado à resposta Sim no item 27."}, {"id": "q11", "n": "28", "label": "O(a) julgador(a) se apresentou?", "type": "choice", "options": ["Sim", "Não"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q23", "n": "29", "label": "Uso de algemas durante a audiência", "type": "choice", "options": ["Retirar as algemas", "Permaneceu com algemas — justificativa escrita fornecida", "Permaneceu com algemas — sem justificativa"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q27", "n": "30", "label": "A entrevista prévia e reservada ocorreu?", "type": "choice", "options": ["Sim", "Não"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q13", "n": "31", "label": "O(a) juiz(a) esclareceu ao(à) custodiado(a) que não fará perguntas de mérito?", "type": "choice", "options": ["Sim", "Não"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q30", "n": "32", "label": "O(a) juiz(a) esclareceu que o(a) custodiado(a) tem o direito de permanecer em silêncio?", "type": "choice", "options": ["Sim", "Não"], "section": "garantias", "required": true, "placeholder": ""}, {"id": "q31", "n": "33", "label": "Nome completo", "type": "choice", "options": ["Respondeu", "Não sabe responder", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": true, "placeholder": "", "bnmp": true}, {"id": "q31_text", "n": "33.1", "label": "Nome completo informado", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q31_cpf", "n": "34", "label": "Número do CPF — Cadastro de Pessoa Física", "type": "choice", "options": ["Respondeu", "Não possui ou não sabe informar", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": true, "placeholder": ""}, {"id": "q31_cpf_text", "n": "34.1", "label": "Número do CPF informado", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever o CPF"}, {"id": "q32", "n": "35", "label": "Nome social, se aplicável", "type": "choice", "options": ["Respondeu", "Não possui", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q32_text", "n": "35.1", "label": "Nome social informado", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q33", "n": "36", "label": "Nacionalidade", "type": "countryautocomplete", "options": [], "section": "qualificacao", "required": true, "placeholder": "Comece a digitar o nome do país", "bnmp": true}, {"id": "q34", "n": "37", "label": "Naturalidade", "type": "choice", "options": ["Respondeu", "Não sabe", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": true, "placeholder": "", "bnmp": true}, {"id": "q34_city", "n": "37.1", "label": "Município de naturalidade e UF — base oficial do IBGE", "type": "cityautocomplete", "options": [], "section": "qualificacao", "required": true, "placeholder": "Comece a digitar o nome do município"}, {"id": "q35", "n": "38", "label": "Data de nascimento", "type": "dateanswer", "options": [], "section": "qualificacao", "required": true, "placeholder": ""}, {"id": "q36", "n": "39", "label": "Nome dos pais", "type": "choice", "options": ["Informou pai e mãe", "Informou apenas o pai", "Informou apenas a mãe", "Não sabe responder", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": ""}, {"id": "q36_pai", "n": "39.1", "label": "Nome do pai", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q36_mae", "n": "39.2", "label": "Nome da mãe", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q37", "n": "40", "label": "O(a) custodiado(a) possui irmão gêmeo?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q37_text", "n": "40.1", "label": "Nome ou dado de identificação do irmão gêmeo", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q38", "n": "41", "label": "Endereço completo", "type": "choice", "options": ["Respondeu", "Não sabe responder", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": true, "placeholder": ""}, {"id": "q38_text", "n": "41.1", "label": "Endereço completo informado", "type": "textarea", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q39", "n": "42", "label": "Condição de moradia", "type": "choice", "options": ["Casa própria", "Cedida", "Alugada", "Situação de rua", "Outra", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q40", "n": "43", "label": "Se mora de aluguel, quanto paga mensalmente?", "type": "choice", "options": ["Menos de meio salário mínimo", "Meio salário mínimo", "Um salário mínimo", "Um salário mínimo e meio", "Dois salários mínimos ou mais", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": true, "placeholder": ""}, {"id": "q41", "n": "44", "label": "Profissão ou ocupação", "type": "choice", "options": ["Informou profissão", "Não possui profissão", "Desempregado", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q41_text", "n": "44.1", "label": "Profissão ou ocupação informada", "type": "text", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q46", "n": "45", "label": "Renda mensal declarada", "type": "choice", "options": ["Não possui renda", "Até um salário mínimo", "Um salário mínimo", "Mais de um salário mínimo", "Dois salários mínimos", "Até cinco salários mínimos", "Cinco salários mínimos ou mais", "Benefício do INSS", "Não sabe responder", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": ""}, {"id": "q42", "n": "46", "label": "Estado civil", "type": "choice", "options": ["Solteiro(a)", "Casado(a)", "Divorciado(a)", "União estável", "Viúvo(a)", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q43", "n": "47", "label": "Está gestante?", "type": "choice", "options": ["Sim", "Não", "Não se aplica", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q43_months", "n": "47.1", "label": "Tempo de gestação em meses", "type": "number", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q44", "n": "48", "label": "Possui filho?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q45", "n": "49", "label": "Quantidade total de filhos", "type": "choice", "options": ["Nenhum", "Um", "Dois", "Três", "Quatro", "Cinco ou mais", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q47", "n": "50", "label": "Quantidade de filhos menores de idade", "type": "choice", "options": ["Nenhum", "Um", "Dois", "Três", "Quatro", "Cinco ou mais", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": ""}, {"id": "q48", "n": "51", "label": "Nome e data de nascimento dos filhos menores", "type": "choice", "options": ["Informou nome e data", "Informou somente o nome", "Não soube responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q48_full", "n": "51.1", "label": "Nome e data de nascimento dos filhos menores", "type": "textarea", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q48_name", "n": "51.2", "label": "Nome dos filhos menores", "type": "textarea", "options": [], "section": "qualificacao", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q49", "n": "52", "label": "Possui filho com necessidades especiais?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": ""}, {"id": "q50", "n": "53", "label": "Presta auxílio financeiro aos dependentes?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q51", "n": "54", "label": "Possui bens em nome próprio?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": ""}, {"id": "q52", "n": "55", "label": "Grau de instrução completo", "type": "choice", "options": ["Não sabe ler ou escrever", "Sabe ler e escrever", "Ensino fundamental", "Ensino médio", "Ensino superior", "Pós-graduação", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q52_estuda", "n": "55.1", "label": "Está estudando?", "type": "choice", "options": ["Sim", "Não"], "section": "qualificacao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q53", "n": "56", "label": "Já foi preso ou processado anteriormente?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q54", "n": "57", "label": "Faz uso de bebida alcoólica?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q55", "n": "58", "label": "Faz uso de drogas?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q56", "n": "59", "label": "Tipo de droga utilizada", "type": "multiselect", "options": ["Maconha", "Cocaína", "Crack", "Outra", "Mais de uma substância", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q57", "n": "60", "label": "Faz uso continuado de medicamento?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q57_med", "n": "60.1", "label": "Medicamento de uso continuado informado", "type": "textarea", "options": [], "section": "saude", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q58", "n": "61", "label": "Possui doença crônica?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q58_doenca", "n": "61.1", "label": "Doença crônica informada", "type": "textarea", "options": [], "section": "saude", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q59", "n": "62", "label": "Possui doença infectocontagiosa?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q59_infecto", "n": "62.1", "label": "Doença infectocontagiosa informada", "type": "textarea", "options": [], "section": "saude", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q60", "n": "63", "label": "Possui infecção sexualmente transmissível?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q60_dst", "n": "63.1", "label": "Infecção sexualmente transmissível informada", "type": "textarea", "options": [], "section": "saude", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q61", "n": "64", "label": "Possui deficiência ou necessidade especial?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q61_necessidade", "n": "64.1", "label": "Necessidade especial ou deficiência informada", "type": "textarea", "options": [], "section": "saude", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q62", "n": "65", "label": "Possui algum transtorno mental?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q62_transtorno", "n": "65.1", "label": "Transtorno mental informado", "type": "textarea", "options": [], "section": "saude", "required": true, "placeholder": "Espaço para escrever", "bnmp": true}, {"id": "q63", "n": "66", "label": "Já realizou tratamento para dependência química?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q64", "n": "67", "label": "Ficou internado para tratamento de dependência química?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q65", "n": "68", "label": "Tempo de internação para tratamento", "type": "choice", "options": ["Até seis meses", "Mais de seis meses até um ano", "Mais de um ano", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q66", "n": "69", "label": "Cor ou raça declarada", "type": "choice", "options": ["Branca", "Preta", "Parda", "Amarela", "Indígena", "Outra", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q67", "n": "70", "label": "É migrante ou indígena?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": ""}, {"id": "q68", "n": "71", "label": "Identidade de gênero", "type": "choice", "options": ["Cisgênero masculino", "Cisgênero feminino", "Homem trans", "Mulher trans", "Travesti", "Não binário", "Outra", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q69", "n": "72", "label": "Orientação sexual", "type": "choice", "options": ["Heterossexual", "Homossexual", "Bissexual", "Pansexual", "Assexual", "Outra", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q70", "n": "73", "label": "Declara integrar a população LGBTQIA+?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "saude", "required": false, "placeholder": "", "bnmp": true}, {"id": "q71", "n": "74", "label": "Advertir o(a) custodiado(a) de que, a partir deste momento, tem direito ao silêncio", "type": "choice", "options": ["Realizado"], "section": "prisao", "required": true, "placeholder": ""}, {"id": "q72", "n": "75", "label": "Data e hora da prisão", "type": "datetimeanswer", "options": [], "section": "prisao", "required": true, "placeholder": ""}, {"id": "q72_text", "n": "75.1", "label": "Data e hora da prisão informadas", "type": "datetime-local", "options": [], "section": "prisao", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q73", "n": "76", "label": "Local no momento da prisão", "type": "choice", "options": ["Em casa", "Na rua", "No trabalho", "Em estabelecimento comercial", "Em veículo", "Outro local", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "prisao", "required": false, "placeholder": ""}, {"id": "q74", "n": "77", "label": "Estava acompanhado(a) por alguém?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "prisao", "required": false, "placeholder": ""}, {"id": "q74_name", "n": "77.1", "label": "Nome da pessoa que acompanhava o custodiado", "type": "text", "options": [], "section": "prisao", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q75", "n": "78", "label": "Órgão executor da prisão", "type": "choice", "options": ["Polícia Militar", "Polícia Civil", "Guarda Municipal", "Polícia Federal", "Polícia Rodoviária Federal", "Polícia Penal", "Outro", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "prisao", "required": false, "placeholder": ""}, {"id": "q76", "n": "79", "label": "Consegue identificar o policial ou o número da viatura?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "prisao", "required": false, "placeholder": ""}, {"id": "q77", "n": "80", "label": "Lembra os nomes dos policiais que realizaram a prisão?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "prisao", "required": false, "placeholder": ""}, {"id": "q78", "n": "81", "label": "Sofreu agressão durante a prisão?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": true, "placeholder": "", "bnmp": true}, {"id": "q79", "n": "82", "label": "Tipo de agressão sofrida", "type": "multiselect", "options": ["Física", "Psicológica", "Sexual", "Ameaça", "Humilhação", "Outra", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": false, "placeholder": "", "bnmp": true}, {"id": "q80", "n": "83", "label": "O(a) acompanhante sofreu agressão?", "type": "choice", "options": ["Sim", "Não", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": false, "placeholder": ""}, {"id": "q81", "n": "84", "label": "Tipo de agressão sofrida pelo acompanhante", "type": "multiselect", "options": ["Física", "Psicológica", "Sexual", "Ameaça", "Humilhação", "Outra", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": false, "placeholder": ""}, {"id": "q82", "n": "85", "label": "Sofreu maus-tratos?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": true, "placeholder": "", "bnmp": true}, {"id": "q83", "n": "86", "label": "Foi torturado?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": true, "placeholder": "", "bnmp": true}, {"id": "q84", "n": "87", "label": "Autor(a) da agressão ou tortura", "type": "multiselect", "options": ["Policial militar", "Policial civil", "Policial federal", "Policial penal", "Guarda municipal", "Populares", "Outro", "Não soube responder", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": false, "placeholder": "", "bnmp": true}, {"id": "q85", "n": "88", "label": "Descrição física do(a) agressor(a) ou torturador(a)", "type": "choice", "options": ["Descreveu", "Não soube descrever", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "violencia", "required": false, "placeholder": ""}, {"id": "q85_text", "n": "88.1", "label": "Descrição física do agressor ou torturador", "type": "textarea", "options": [], "section": "violencia", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q86", "n": "89", "label": "Foi submetido a exame de corpo de delito?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": true, "placeholder": ""}, {"id": "q87", "n": "90", "label": "O responsável pelo exame se apresentou como médico?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": true, "placeholder": ""}, {"id": "q88", "n": "91", "label": "Local do exame", "type": "choice", "options": ["Consultório", "Sala", "Corredor", "Cela", "Ambulância", "Outro local", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": true, "placeholder": ""}, {"id": "q89", "n": "92", "label": "Policiais permaneceram no local durante o exame?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": true, "placeholder": ""}, {"id": "q90", "n": "93", "label": "Os policiais presentes eram os mesmos que realizaram a prisão?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": false, "placeholder": ""}, {"id": "q91", "n": "94", "label": "Gênero dos policiais que permaneceram no local", "type": "choice", "options": ["Masculino", "Feminino", "Homens e mulheres", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": false, "placeholder": ""}, {"id": "q92", "n": "95", "label": "O(a) médico(a) solicitou a permanência de policiais no local do exame?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": false, "placeholder": ""}, {"id": "q93", "n": "96", "label": "Após o exame, foi levado à delegacia ou ao presídio?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": false, "placeholder": ""}, {"id": "q94", "n": "97", "label": "Tempo entre a prisão e a entrega na delegacia ou presídio", "type": "choice", "options": ["Menos de uma hora", "De uma a menos de duas horas", "De duas a três horas", "Mais de três horas", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": false, "placeholder": ""}, {"id": "q95", "n": "98", "label": "Como foi conduzido(a) após a detenção?", "type": "choice", "options": ["Viatura comum", "Viatura fechada", "Viatura fechada e ventilada", "Viatura fechada e não ventilada", "Viatura lotada e não ventilada", "Viatura lotada e ventilada", "Carro próprio", "Outro meio", "Não consegue responder", "Exerceu o direito ao silêncio"], "section": "exame", "required": false, "placeholder": ""}, {"id": "q96", "n": "99", "label": "Quem o(a) recebeu na delegacia?", "type": "choice", "options": ["Agente de polícia", "Escrivão de polícia", "Delegado de polícia", "Outro servidor", "Não sabe dizer", "Não consegue responder", "Exerceu o direito ao silêncio", "Não foi para a delegacia"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q97", "n": "100", "label": "Foi ouvido(a) pelo(a) delegado(a)?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio", "Não foi para a delegacia"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q98", "n": "101", "label": "O(a) delegado(a) estava presente no momento da oitiva do(a) custodiado(a)?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio", "Não foi para a delegacia"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q99", "n": "102", "label": "Leu ou lhe foi lido o que assinou na delegacia ou em outro local em que esteve preso?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q100", "n": "103", "label": "Se não leu, qual foi o motivo?", "type": "choice", "options": ["Não foi oportunizado", "Não sabe ler", "Não sabia que podia ler", "Não houve tempo", "Outro motivo", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q101", "n": "104", "label": "Quem realizou a oitiva se identificou por nome ou registro?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio", "Não teve oitiva"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q102", "n": "105", "label": "Local da oitiva", "type": "choice", "options": ["Sala", "Cela", "Viatura", "Corredor", "Outro local", "Não sabe", "Não consegue responder", "Exerceu o direito ao silêncio", "Não teve oitiva"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q103", "n": "106", "label": "Havia policial responsável pela prisão durante a oitiva?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio", "Não teve oitiva"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q104", "n": "107", "label": "No momento da prisão, foi informado do direito ao silêncio?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": true, "placeholder": ""}, {"id": "q105", "n": "108", "label": "Foi informado do direito de comunicar a prisão por telefone?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q106", "n": "109", "label": "A família ou pessoa indicada foi informada da prisão?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q107", "n": "110", "label": "Foi informado do direito de contratar advogado de confiança?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q108", "n": "111", "label": "A oitiva na delegacia foi acompanhada por advogado?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio", "Não teve oitiva"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q109", "n": "112", "label": "Relatou agressão ao delegado durante a oitiva?", "type": "choice", "options": ["Sim", "Não", "Não houve agressão", "Não consegue responder", "Exerceu o direito ao silêncio", "Não teve oitiva"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q110", "n": "113", "label": "Foi esclarecido sobre o motivo da prisão?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": true, "placeholder": ""}, {"id": "q111", "n": "114", "label": "Foi arbitrada fiança na delegacia?", "type": "choice", "options": ["Sim", "Ficou sabendo, mas não possui condições financeiras", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio", "Não foi levado à delegacia"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q112", "n": "115", "label": "Recebeu água potável ou alimentação desde a prisão?", "type": "choice", "options": ["Sim", "Não", "Não tem condições de responder", "Exerceu o direito ao silêncio"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q112_text", "n": "115.1", "label": "Descrição de recebimento de água potável ou alimentação desde a prisão", "type": "textarea", "options": [], "section": "delegacia", "required": true, "placeholder": "Espaço ampliado para descrever a ausência de água potável ou alimentação"}, {"id": "q113", "n": "116", "label": "Há informação segura sobre reincidência?", "type": "choice", "options": ["Sim", "Não", "Não existe certidão segura da reincidência"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q130", "n": "117", "label": "Perspectivas consideradas na audiência", "type": "multiselect", "options": ["Raça", "Cor", "Gênero", "Deficiência", "Condição social", "Múltiplas perspectivas", "Sem perspectiva"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q115_outras_perguntas", "n": "118", "label": "O juiz fez outras perguntas não obrigatórias?", "type": "choice", "options": ["Sim", "Não"], "section": "delegacia", "required": false, "placeholder": ""}, {"id": "q115_outras_perguntas_text", "n": "118.1", "label": "Outras perguntas não obrigatórias formuladas pelo juiz", "type": "textarea", "options": [], "section": "delegacia", "required": true, "placeholder": "Espaço para o juiz registrar outras perguntas"}, {"id": "q114", "n": "119", "label": "O juiz permitiu perguntas do Ministério Público e da defesa?", "type": "choice", "options": ["Sim", "Não"], "section": "partes", "required": true, "placeholder": ""}, {"id": "q115", "n": "120", "label": "O promotor de justiça fez perguntas?", "type": "choice", "options": ["Sim", "Não"], "section": "partes", "required": false, "placeholder": ""}, {"id": "q115_text", "n": "120.1", "label": "Pergunta(s) formulada(s) pelo Ministério Público", "type": "textarea", "options": [], "section": "partes", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q116", "n": "121", "label": "A defesa fez perguntas?", "type": "choice", "options": ["Sim", "Não"], "section": "partes", "required": false, "placeholder": ""}, {"id": "q116_text", "n": "121.1", "label": "Pergunta(s) formulada(s) pela defesa", "type": "textarea", "options": [], "section": "partes", "required": true, "placeholder": "Espaço para escrever"}, {"id": "q119_citacao_cpp", "n": "122", "label": "O juiz fez a citação do custodiado nos termos do § 7º do art. 310 do CPP?", "type": "choice", "options": ["Sim", "Não"], "section": "partes", "required": false, "placeholder": ""}, {"id": "q119_citacao_cpp_processos", "n": "122.1", "label": "Número(s) do(s) processo(s) em que foi realizada a citação", "type": "textarea", "options": [], "section": "partes", "required": true, "placeholder": "Espaço para registrar o número dos processos em que foi realizada a citação"}, {"id": "q117", "n": "123", "label": "A defesa questionou a legalidade da prisão?", "type": "choice", "options": ["Sim", "Não"], "section": "partes", "required": false, "placeholder": ""}, {"id": "q118", "n": "124", "label": "O Ministério Público questionou a legalidade da prisão?", "type": "choice", "options": ["Sim", "Não"], "section": "partes", "required": false, "placeholder": ""}, {"id": "q119", "n": "125", "label": "Pedidos feitos pelo Ministério Público", "type": "multiselect", "options": ["Homologar a prisão e converter em preventiva", "Relaxar a prisão", "Homologar e conceder liberdade com cautelares e fiança", "Homologar e conceder liberdade com cautelares, sem fiança", "Homologar e manter prisão decretada", "Homologar a prisão e revogar a prisão decretada anteriormente", "Homologar a prisão civil e revogar a prisão, uma vez comprovado o pagamento do valor do mandado", "Outro pedido"], "section": "partes", "required": true, "placeholder": ""}, {"id": "q120", "n": "126", "label": "Pedidos feitos pela defesa", "type": "multiselect", "options": ["Homologar a prisão e converter em preventiva", "Relaxar a prisão", "Homologar e conceder liberdade com cautelares e fiança", "Homologar e conceder liberdade com cautelares, sem fiança", "Homologar e manter prisão decretada", "Homologar a prisão e revogar a prisão decretada anteriormente", "Homologar a prisão civil e revogar a prisão, uma vez comprovado o pagamento do valor do mandado", "Outro pedido"], "section": "partes", "required": true, "placeholder": ""}, {"id": "q121", "n": "127", "label": "O(a) juiz(a) proferiu a decisão na audiência?", "type": "choice", "options": ["Sim", "Não"], "section": "decisao", "required": true, "placeholder": ""}, {"id": "q122", "n": "128", "label": "O(a) juiz(a) leu ou explicou a decisão?", "type": "choice", "options": ["Sim — leu", "Sim — explicou", "Sim — leu e explicou", "Não", "Juntou por escrito"], "section": "decisao", "required": true, "placeholder": ""}, {"id": "q123", "n": "129", "label": "O(a) promotor(a) de justiça tomou alguma providência após relato de agressão?", "type": "choice", "options": ["Sim", "Não", "Não houve notícia de agressão"], "section": "decisao", "required": false, "placeholder": ""}, {"id": "q124", "n": "130", "label": "Providência da defesa após notícia de agressão", "type": "choice", "options": ["Sim", "Não", "Não houve notícia de agressão"], "section": "decisao", "required": false, "placeholder": ""}, {"id": "q125", "n": "131", "label": "Providência judicial após notícia de agressão", "type": "choice", "options": ["Sim", "Não", "Não houve notícia de agressão"], "section": "decisao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q126", "n": "132", "label": "Tipo de decisão judicial proferida na audiência pelo(a) juiz(a)", "type": "choice", "options": ["Homologo a prisão e converto em preventiva", "Relaxo a prisão", "Homologo e concedo a liberdade com cautelares e fiança", "Homologo e concedo a liberdade com cautelares, sem fiança", "Homologo a prisão e mantenho a prisão decretada", "Homologo a prisão e revogo a prisão decretada anteriormente", "Homologo a prisão civil e revogo a prisão, uma vez comprovado o pagamento do valor do mandado", "Profiro outra decisão"], "section": "decisao", "required": true, "placeholder": "", "bnmp": true}, {"id": "q126_outra_decisao", "n": "132-A", "label": "Conteúdo da outra decisão proferida", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para incluir a decisão"}, {"id": "q126_f1", "n": "132.1", "label": "Fundamentação individualizada — Homologo a prisão e converto em preventiva", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever — campo expansível para fundamentação de até 3 páginas", "bnmp": true, "max_pages": 3}, {"id": "q126_f2", "n": "132.2", "label": "Fundamentação individualizada — Relaxo a prisão", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": true}, {"id": "q126_f3", "n": "132.3", "label": "Fundamentação individualizada — Homologo e concedo a liberdade com cautelares e fiança", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": true}, {"id": "q126_f4", "n": "132.4", "label": "Fundamentação individualizada — Homologo e concedo a liberdade com cautelares, sem fiança", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": true}, {"id": "q126_f5", "n": "132.5", "label": "Fundamentação individualizada — Homologo a prisão e mantenho a prisão decretada", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": true}, {"id": "q126_f6", "n": "132.5-A", "label": "Fundamentação individualizada — Homologo a prisão e revogo a prisão decretada anteriormente", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": true}, {"id": "q126_f7", "n": "132.6", "label": "Fundamentação individualizada — Homologo a prisão civil e revogo a prisão, uma vez comprovado o pagamento do valor do mandado", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": true}, {"id": "q126_f8", "n": "132.7", "label": "Fundamentação individualizada — Profiro outra decisão", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever", "bnmp": false}, {"id": "q127", "n": "133", "label": "Das irregularidades, o(a) juiz(a) comunicou:", "type": "multiselect", "options": ["Corregedoria da Polícia", "Conselho Regional de Medicina", "Ministério Público — controle externo da polícia", "Comissão de Direitos Humanos", "Não comunicou", "Não existe irregularidade", "Outro órgão"], "section": "decisao", "required": false, "placeholder": ""}, {"id": "q127_outro_orgao", "n": "133.1", "label": "Nome do outro órgão a ser comunicado", "type": "text", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço para escrever o nome do outro órgão"}, {"id": "q128", "n": "134", "label": "O(a) juiz(a) encaminhou o(a) custodiado(a):", "type": "multiselect", "options": ["Comunidade terapêutica", "Consulta médica", "Hospital psiquiátrico", "Frequentar palestras", "Novo exame de corpo de delito", "Nenhum encaminhamento", "Outro encaminhamento"], "section": "decisao", "required": false, "placeholder": ""}, {"id": "q128_outro_encaminhamento", "n": "134.1", "label": "Descrição do outro encaminhamento", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço ampliado para escrever o encaminhamento"}, {"id": "q129_alvara", "n": "135", "label": "O(a) juiz(a) mandou expedir o alvará?", "type": "choice", "options": ["Sim", "Sim — Alvará com mandado de monitoramento eletrônico", "Não"], "section": "decisao", "required": false, "placeholder": "", "bnmp": true}, {"id": "q129_alvara_motivo", "n": "135-S", "label": "Motivo da expedição do alvará", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço para escrever o motivo do alvará", "bnmp": true}, {"id": "q129_alvara_monitor_motivo", "n": "135-M", "label": "Motivo do alvará com mandado de monitoramento eletrônico", "type": "textarea", "options": [], "section": "decisao", "required": true, "placeholder": "Espaço para escrever o motivo do alvará com monitoramento eletrônico", "bnmp": true}, {"id": "q132_1_mandado", "n": "135.1", "label": "Se foi escolhida a alternativa “Não” no item anterior, o(a) juiz(a) expedirá:", "type": "choice", "options": ["Mandado de prisão", "Mandado de prisão domiciliar"], "section": "decisao", "required": true, "placeholder": ""}, {"id": "q129", "n": "136", "label": "Gerar relatório da decisão com os seguintes blocos", "type": "multiselect", "options": ["Dados do processo", "Dados da legislação e tipificação", "Dados pessoais do custodiado", "Dados familiares do custodiado", "Dados de saúde", "Dados de vulnerabilidade", "Dados do momento da prisão", "Manifestação do Ministério Público", "Manifestação da defesa", "Sem perspectiva"], "section": "documentos", "required": true, "placeholder": ""}, {"id": "final_generator", "n": "AÇÃO FINAL", "label": "Gerar automaticamente decisão com relatório, fundamentos, dispositivo e encaminhamentos", "type": "action", "options": [], "section": "documentos", "required": true, "placeholder": ""}, {"id": "q136_termo_ata", "n": "137", "label": "Gerar termo de audiência em formato de ata, em texto corrido e fluido", "type": "action", "action_kind": "minutes", "options": [], "section": "documentos", "required": false, "placeholder": "", "help": "Gera termo de audiência em texto corrido, fluido e editável. O processo e os nomes do(a) custodiado(a), juiz(a), promotor(a) de Justiça e defensor(a) são inseridos automaticamente em negrito e caixa alta. Ao acionar este botão, o relógio da audiência para automaticamente."}, {"id": "q137_repositorio", "n": "138", "label": "Decisão – Repositório", "type": "action", "action_kind": "repository", "options": [], "section": "documentos", "required": true, "placeholder": "", "help": "Abre a Decisão – Repositório com DR1 a DR8, relatório e participantes. O texto continua editável até a publicação. Assim que este botão é acionado, o relógio da audiência para automaticamente."}, {"id": "q137_publicada", "n": "138", "label": "Decisão Publicada", "type": "action", "action_kind": "published_decision", "options": [], "section": "documentos", "required": false, "placeholder": "", "help": "Documento definitivo gerado após Publicar a Decisão – Repositório. Fica armazenado dentro da própria ACI-G, em modo somente leitura, podendo ser consultado, selecionado, copiado e aberto em PDF, sem possibilidade de edição."}], "dependencies": {"q20": {"field": "q15", "values": ["Videoconferência", "Telepresencial"]}, "q40": {"field": "q39", "values": ["Alugada"]}, "q45": {"field": "q44", "values": ["Sim", "Não"]}, "q47": {"field": "q44", "values": ["Sim", "Não"]}, "q48": {"field": "q47", "values": ["Um", "Dois", "Três", "Quatro", "Cinco ou mais"]}, "q49": {"field": "q47", "values": ["Um", "Dois", "Três", "Quatro", "Cinco ou mais"]}, "q56": {"field": "q55", "values": ["Sim"]}, "q64": {"field": "q63", "values": ["Sim"]}, "q65": {"field": "q64", "values": ["Sim"]}, "q79": {"field": "q78", "values": ["Sim"]}, "q80": {"field": "q74", "values": ["Sim"]}, "q81": {"field": "q80", "values": ["Sim"]}, "q84": {"field": "q78", "values": ["Sim"]}, "q85": {"field": "q78", "values": ["Sim"]}, "q87": {"field": "q86", "values": ["Sim"]}, "q88": {"field": "q86", "values": ["Sim"]}, "q89": {"field": "q86", "values": ["Sim"]}, "q90": {"field": "q89", "values": ["Sim"]}, "q91": {"field": "q89", "values": ["Sim"]}, "q92": {"field": "q89", "values": ["Sim"]}, "q93": {"field": "q86", "values": ["Sim"]}, "q98": {"field": "q97", "values": ["Não"]}, "q100": {"field": "q99", "values": ["Não"]}, "q31_text": {"field": "q31", "values": ["Respondeu"]}, "q32_text": {"field": "q32", "values": ["Respondeu"]}, "q34_city": {"field": "q34", "values": ["Respondeu"]}, "q36_pai": {"field": "q36", "values": ["Informou pai e mãe", "Informou apenas o pai"]}, "q36_mae": {"field": "q36", "values": ["Informou pai e mãe", "Informou apenas a mãe"]}, "q37_text": {"field": "q37", "values": ["Sim"]}, "q38_text": {"field": "q38", "values": ["Respondeu"]}, "q41_text": {"field": "q41", "values": ["Informou profissão"]}, "q43_months": {"field": "q43", "values": ["Sim"]}, "q48_full": {"field": "q48", "values": ["Informou nome e data"]}, "q48_name": {"field": "q48", "values": ["Informou somente o nome"]}, "q72_text": {"field": "q72", "values": ["Respondeu"]}, "q74_name": {"field": "q74", "values": ["Sim"]}, "q85_text": {"field": "q85", "values": ["Descreveu"]}, "q31_cpf_text": {"field": "q31_cpf", "values": ["Respondeu"]}, "q57_med": {"field": "q57", "values": ["Sim"]}, "q58_doenca": {"field": "q58", "values": ["Sim"]}, "q59_infecto": {"field": "q59", "values": ["Sim"]}, "q60_dst": {"field": "q60", "values": ["Sim"]}, "q61_necessidade": {"field": "q61", "values": ["Sim"]}, "q62_transtorno": {"field": "q62", "values": ["Sim"]}, "q112_text": {"field": "q112", "values": ["Não"]}, "q30_idioma": {"field": "q30_tradutor", "values": ["Sim"]}, "q126_f1": {"field": "q126", "values": ["Homologo a prisão e converto em preventiva"]}, "q126_f2": {"field": "q126", "values": ["Relaxo a prisão"]}, "q126_f3": {"field": "q126", "values": ["Homologo e concedo a liberdade com cautelares e fiança"]}, "q126_f4": {"field": "q126", "values": ["Homologo e concedo a liberdade com cautelares, sem fiança"]}, "q126_f5": {"field": "q126", "values": ["Homologo a prisão e mantenho a prisão decretada"]}, "q126_f6": {"field": "q126", "values": ["Homologo a prisão e revogo a prisão decretada anteriormente"]}, "q126_f7": {"field": "q126", "values": ["Homologo a prisão civil e revogo a prisão, uma vez comprovado o pagamento do valor do mandado"]}, "q126_f8": {"field": "q126", "values": ["Profiro outra decisão"]}, "q129_alvara_motivo": {"field": "q129_alvara", "values": ["Sim"]}, "q115_text": {"field": "q115", "values": ["Sim"]}, "q116_text": {"field": "q116", "values": ["Sim"]}, "q115_outras_perguntas_text": {"field": "q115_outras_perguntas", "values": ["Sim"]}, "q119_citacao_cpp_processos": {"field": "q119_citacao_cpp", "values": ["Sim"]}, "q126_outra_decisao": {"field": "q126", "values": ["Profiro outra decisão"]}, "q127_outro_orgao": {"field": "q127", "values": ["Outro órgão"]}, "q128_outro_encaminhamento": {"field": "q128", "values": ["Outro encaminhamento"]}, "q132_1_mandado": {"field": "q129_alvara", "values": ["Não"]}, "q129_alvara_monitor_motivo": {"field": "q129_alvara", "values": ["Sim — Alvará com mandado de monitoramento eletrônico"]}, "q30_interprete_tipo": {"field": "q30_interprete", "values": ["Sim"]}}},lawCatalog={"Código Penal": ["Decreto-Lei nº 2.848/1940 — Código Penal"], "Legislação penal especial": ["Lei nº 11.343/2006 — Lei de Drogas", "Lei nº 10.826/2003 — Estatuto do Desarmamento", "Lei nº 11.340/2006 — Lei Maria da Penha", "Lei nº 12.850/2013 — Organizações Criminosas", "Lei nº 9.613/1998 — Lavagem de Dinheiro", "Lei nº 9.503/1997 — Código de Trânsito Brasileiro", "Lei nº 8.069/1990 — Estatuto da Criança e do Adolescente", "Lei nº 9.605/1998 — Crimes Ambientais", "Lei nº 8.072/1990 — Crimes Hediondos", "Lei nº 7.716/1989 — Crimes resultantes de preconceito", "Lei nº 13.869/2019 — Abuso de Autoridade", "Decreto-Lei nº 3.688/1941 — Lei das Contravenções Penais", "Outra legislação penal especial"], "Ambas": ["Decreto-Lei nº 2.848/1940 — Código Penal", "Lei nº 11.343/2006 — Lei de Drogas", "Lei nº 10.826/2003 — Estatuto do Desarmamento", "Lei nº 11.340/2006 — Lei Maria da Penha", "Lei nº 12.850/2013 — Organizações Criminosas", "Lei nº 9.613/1998 — Lavagem de Dinheiro", "Lei nº 9.503/1997 — Código de Trânsito Brasileiro", "Lei nº 8.069/1990 — ECA", "Lei nº 9.605/1998 — Crimes Ambientais", "Outra legislação"]},criminalTypes={"Decreto-Lei nº 2.848/1940 — Código Penal": ["Art. 121 — Homicídio", "Art. 129 — Lesão corporal", "Art. 138 — Calúnia", "Art. 139 — Difamação", "Art. 140 — Injúria", "Art. 147 — Ameaça", "Art. 148 — Sequestro e cárcere privado", "Art. 155 — Furto", "Art. 157 — Roubo", "Art. 158 — Extorsão", "Art. 163 — Dano", "Art. 168 — Apropriação indébita", "Art. 171 — Estelionato", "Art. 180 — Receptação", "Art. 213 — Estupro", "Art. 215-A — Importunação sexual", "Art. 217-A — Estupro de vulnerável", "Art. 288 — Associação criminosa", "Art. 297 — Falsificação de documento público", "Art. 304 — Uso de documento falso", "Art. 312 — Peculato", "Art. 316 — Concussão", "Art. 317 — Corrupção passiva", "Art. 329 — Resistência", "Art. 330 — Desobediência", "Art. 331 — Desacato", "Outro artigo do Código Penal"], "Lei nº 11.343/2006 — Lei de Drogas": ["Art. 28 — Porte para consumo", "Art. 33 — Tráfico", "Art. 34 — Maquinário", "Art. 35 — Associação para o tráfico", "Art. 36 — Financiamento", "Art. 37 — Colaboração", "Outro artigo"], "Lei nº 10.826/2003 — Estatuto do Desarmamento": ["Art. 12 — Posse irregular", "Art. 14 — Porte ilegal de arma de uso permitido", "Art. 16 — Arma de uso restrito", "Art. 17 — Comércio ilegal", "Art. 18 — Tráfico internacional", "Outro artigo"], "Lei nº 11.340/2006 — Lei Maria da Penha": ["Art. 24-A — Descumprimento de medida protetiva", "Crime do Código Penal em contexto doméstico", "Outro enquadramento"], "Lei nº 12.850/2013 — Organizações Criminosas": ["Art. 2º — Integrar ou promover organização criminosa", "Embaraço à investigação", "Outro artigo"], "Lei nº 9.613/1998 — Lavagem de Dinheiro": ["Art. 1º — Lavagem ou ocultação de bens, direitos e valores", "Outro artigo"], "Lei nº 9.503/1997 — Código de Trânsito Brasileiro": ["Art. 302 — Homicídio culposo", "Art. 303 — Lesão corporal culposa", "Art. 306 — Embriaguez ao volante", "Art. 309 — Dirigir sem habilitação gerando perigo", "Outro artigo"], "Lei nº 8.069/1990 — Estatuto da Criança e do Adolescente": ["Art. 232", "Art. 241-A", "Art. 244-B — Corrupção de menores", "Outro artigo"], "Lei nº 9.605/1998 — Crimes Ambientais": ["Crime contra a fauna", "Crime contra a flora", "Poluição", "Outro crime ambiental"]},countryCodes=["AW", "AF", "AO", "AI", "AX", "AL", "AD", "AE", "AR", "AM", "AS", "AQ", "TF", "AG", "AU", "AT", "AZ", "BI", "BE", "BJ", "BQ", "BF", "BD", "BG", "BH", "BS", "BA", "BL", "BY", "BZ", "BM", "BO", "BR", "BB", "BN", "BT", "BV", "BW", "CF", "CA", "CC", "CH", "CL", "CN", "CI", "CM", "CD", "CG", "CK", "CO", "KM", "CV", "CR", "CU", "CW", "CX", "KY", "CY", "CZ", "DE", "DJ", "DM", "DK", "DO", "DZ", "EC", "EG", "ER", "EH", "ES", "EE", "ET", "FI", "FJ", "FK", "FR", "FO", "FM", "GA", "GB", "GE", "GG", "GH", "GI", "GN", "GP", "GM", "GW", "GQ", "GR", "GD", "GL", "GT", "GF", "GU", "GY", "HK", "HM", "HN", "HR", "HT", "HU", "ID", "IM", "IN", "IO", "IE", "IR", "IQ", "IS", "IL", "IT", "JM", "JE", "JO", "JP", "KZ", "KE", "KG", "KH", "KI", "KN", "KR", "KW", "LA", "LB", "LR", "LY", "LC", "LI", "LK", "LS", "LT", "LU", "LV", "MO", "MF", "MA", "MC", "MD", "MG", "MV", "MX", "MH", "MK", "ML", "MT", "MM", "ME", "MN", "MP", "MZ", "MR", "MS", "MQ", "MU", "MW", "MY", "YT", "NA", "NC", "NE", "NF", "NG", "NI", "NU", "NL", "NO", "NP", "NR", "NZ", "OM", "PK", "PA", "PN", "PE", "PH", "PW", "PG", "PL", "PR", "KP", "PT", "PY", "PS", "PF", "QA", "RE", "RO", "RU", "RW", "SA", "SD", "SN", "SG", "GS", "SH", "SJ", "SB", "SL", "SV", "SM", "SO", "PM", "RS", "SS", "ST", "SR", "SK", "SI", "SE", "SZ", "SX", "SC", "SY", "TC", "TD", "TG", "TH", "TJ", "TK", "TM", "TL", "TO", "TT", "TN", "TR", "TV", "TW", "TZ", "UG", "UA", "UM", "UY", "US", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "ZA", "ZM", "ZW"],countries=(function(){try{const dn=new Intl.DisplayNames(['pt-BR'],{type:'region'});return countryCodes.map(c=>dn.of(c)).filter(Boolean).sort((a,b)=>a.localeCompare(b,'pt-BR')).concat(['Outra nacionalidade'])}catch(e){return ['Brasil','Argentina','Bolívia','Chile','Colômbia','Paraguai','Peru','Uruguai','Portugal','Estados Unidos','Outra nacionalidade']}})(),igacFields=["q17", "q18", "q19", "q20", "q21", "q22", "q23", "q27", "q30", "q71", "q39", "q43", "q44", "q47", "q49", "q50", "q52", "q54", "q55", "q57", "q58", "q59", "q60", "q61", "q62", "q63", "q64", "q66", "q67", "q68", "q69", "q70", "q74", "q76", "q77", "q78", "q80", "q82", "q83", "q86", "q87", "q89", "q92", "q104", "q110", "q114", "q121"];const answers={};let started=null;let ended=null;let current=0;
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const has=v=>Array.isArray(v)?v.length>0:String(v??'').trim()!=='';
+function repositoryModeActive(){return !!Number(answers.q137_repository_choice||0)}
+function isDecisionFoundationFieldId(id){
+ return /^q126_f\d+$/.test(String(id||''))||id==='q126_outra_decisao';
+}
+function visible(f){
+ if(repositoryModeActive()&&isDecisionFoundationFieldId(f.id))return false;
+ const d=schema.dependencies[f.id];
+ if(!d)return true;
+ const v=answers[d.field];
+ return Array.isArray(v)?v.some(x=>d.values.includes(x)):d.values.includes(v)
+}
+
+const languageToolURL='https://api.languagetool.org/v2/check';
+function enableNativeSpell(el){el.setAttribute('spellcheck','true');el.setAttribute('lang','pt-BR');el.setAttribute('autocapitalize','sentences')}
+async function reviewText(fieldId,el,panel,status){
+ const original=el.value||'';if(!original.trim()){status.textContent='Digite algum texto antes da revisão.';return}
+ status.textContent='Revisando...';panel.classList.remove('open');panel.innerHTML='';
+ try{
+  const body=new URLSearchParams({text:original,language:'pt-BR'});
+  const r=await fetch(languageToolURL,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+  if(!r.ok)throw new Error('Serviço indisponível');
+  const data=await r.json(),matches=(data.matches||[]).filter(m=>m.replacements&&m.replacements.length);
+  if(!matches.length){status.textContent='Nenhuma correção sugerida.';return}
+  status.textContent=matches.length+' sugestão(ões) encontrada(s).';
+  matches.slice(0,20).forEach(m=>{
+   const issue=document.createElement('div');issue.className='spell-issue';
+   const wrong=original.slice(m.offset,m.offset+m.length);
+   issue.innerHTML='<span class="spell-word">'+esc(wrong)+'</span><div class="spell-suggestions"></div>';
+   const sugg=issue.querySelector('.spell-suggestions');
+   m.replacements.slice(0,6).forEach(rep=>{
+    const b=document.createElement('button');b.type='button';b.className='spell-suggestion';b.textContent=rep.value;
+    b.onclick=()=>{const current=el.value;const pos=current.indexOf(wrong);if(pos>=0){el.value=current.slice(0,pos)+rep.value+current.slice(pos+wrong.length);answers[fieldId]=el.value;update();reviewText(fieldId,el,panel,status)}};
+    sugg.appendChild(b)
+   });panel.appendChild(issue)
+  });panel.classList.add('open')
+ }catch(e){status.textContent='Não foi possível consultar o corretor on-line. Use também o corretor nativo do navegador com clique direito.'}
+}
+function addSpellTools(fieldId,el,container){
+ enableNativeSpell(el);
+ const tools=document.createElement('div');tools.className='spell-tools';
+ const btn=document.createElement('button');btn.type='button';btn.className='spell-btn';btn.textContent='Revisar ortografia';
+ const status=document.createElement('span');status.className='spell-status';status.textContent='Corretor pt-BR ativo';
+ const panel=document.createElement('div');panel.className='spell-panel';
+ btn.onclick=()=>reviewText(fieldId,el,panel,status);
+ el.addEventListener('dblclick',()=>reviewText(fieldId,el,panel,status));
+ tools.appendChild(btn);tools.appendChild(status);container.appendChild(tools);container.appendChild(panel)
+}
+
+function stopHearingTimerForDocument(reason){
+ if(started && !ended){
+  ended=new Date();
+ }
+ answers.__timer_stopped_for_document=true;
+ answers.__timer_stop_reason=reason||'documento_final';
+ answers.__timer_stopped_at=ended?ended.toISOString():new Date().toISOString();
+ update();
+}
+
+function elapsedText(){if(!started)return '00:00';const fim=ended||new Date();const s=Math.max(0,Math.floor((fim-started)/1000));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+let municipios=[];
+const ibgeMunicipiosURL='https://servicodados.ibge.gov.br/api/v1/localidades/municipios?orderBy=nome';
+function municipioUF(m){return m.microrregiao?.mesorregiao?.UF?.sigla||m['regiao-imediata']?.['regiao-intermediaria']?.UF?.sigla||''}
+async function loadMunicipios(force=false){
+ try{
+   if(!force){
+     const cache=localStorage.getItem('acig_ibge_municipios');
+     if(cache){
+       const parsed=JSON.parse(cache);
+       if(Array.isArray(parsed)&&parsed.length>5000){municipios=parsed;refresh();return}
+     }
+   }
+   const r=await fetch(ibgeMunicipiosURL,{method:'GET',mode:'cors',cache:'no-cache',headers:{'Accept':'application/json'}});
+   if(!r.ok)throw new Error('IBGE indisponível: '+r.status);
+   const data=await r.json();
+   municipios=data.map(m=>({nome:m.nome,uf:municipioUF(m)})).filter(x=>x.nome&&x.uf).map(x=>x.nome+' - '+x.uf).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+   localStorage.setItem('acig_ibge_municipios',JSON.stringify(municipios));
+   localStorage.setItem('acig_ibge_municipios_atualizado',new Date().toISOString());
+   refresh()
+ }catch(e){console.warn('Não foi possível carregar a base oficial de municípios do IBGE.',e);refresh()}
+}
+function normCity(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+
+function normCountry(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
+function renderCountrySuggestions(q,list,input,id){
+ const term=normCountry(q);list.innerHTML='';
+ if(!term){list.classList.remove('open');return}
+ const prefix=[],contains=[];
+ for(const name of countries){const n=normCountry(name);if(n.startsWith(term))prefix.push(name);else if(n.includes(term))contains.push(name);if(prefix.length>=12)break}
+ const found=[...prefix,...contains].slice(0,12);
+ found.forEach(x=>{const d=document.createElement('div');d.className='city-item';d.textContent=x;d.setAttribute('role','option');d.onclick=()=>{answers[id]=x;input.value=x;list.classList.remove('open');update()};list.appendChild(d)});
+ list.classList.toggle('open',found.length>0)
+}
+function renderCitySuggestions(q,list,input){
+ const term=normCity(q);list.innerHTML='';
+ if(!term){list.classList.remove('open');return}
+ const prefix=[],contains=[];
+ for(const city of municipios){const n=normCity(city);if(n.startsWith(term))prefix.push(city);else if(n.includes(term))contains.push(city);if(prefix.length>=12)break}
+ const found=[...prefix,...contains].slice(0,12);
+ if(!found.length){list.classList.remove('open');return}
+ found.forEach(x=>{const d=document.createElement('div');d.className='city-item';d.textContent=x;d.setAttribute('role','option');d.onclick=()=>{const id=input.closest('.card').id.replace('card_','');answers[id]=x;input.value=x;list.classList.remove('open');update()};list.appendChild(d)});
+ list.classList.add('open')
+}
+
+function brasiliaLocalValue(dateObj){
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(dateObj);
+ const get=t=>parts.find(p=>p.type===t)?.value||'';
+ return get('year')+'-'+get('month')+'-'+get('day')+'T'+get('hour')+':'+get('minute');
+}
+async function initializeBrasiliaTime(){
+ if(answers.q8)return;
+ try{
+  const r=await fetch('https://worldtimeapi.org/api/timezone/America/Sao_Paulo');
+  if(!r.ok)throw new Error('horário on-line indisponível');
+  const data=await r.json();
+  answers.q8=brasiliaLocalValue(new Date(data.datetime));
+ }catch(e){answers.q8=brasiliaLocalValue(new Date())}
+ refresh();
+}
+function build(){schema.sections.forEach((s,i)=>{const b=document.createElement('button');b.className='step';b.onclick=()=>show(i);b.innerHTML='<span class="step-index">'+(i+1)+'</span><span class="step-text">'+s.icon+' '+esc(s.title)+'</span>';steps.appendChild(b);const sec=document.createElement('section');sec.className='stage';sec.innerHTML='<div class="stage-head"><div class="stage-kicker">Etapa '+(i+1)+' de '+schema.sections.length+'</div><h2>'+s.icon+' '+esc(s.title)+'</h2><div class="stage-note">'+note(s.id)+'</div></div>';schema.fields.filter(f=>f.section===s.id).forEach(f=>sec.appendChild(card(f)));stages.appendChild(sec)});show(0);update()}
+function note(id){return{processo:'Siga os registros iniciais exatamente na ordem do roteiro: abertura, processo, legislação, tipificação, comarca e dados do juízo.',estrutura:'Registre formato, localização dos participantes, prazo, câmera, algemas e segurança.',garantias:'Confirme entrevista reservada, defesa, qualificação e direito ao silêncio.',qualificacao:'Percorra integralmente a qualificação, moradia, renda, filhos, dependentes e escolaridade.',saude:'Registre antecedentes, uso de substâncias, saúde física, saúde mental e marcadores de vulnerabilidade.',prisao:'Reforce o silêncio e reconstrua data, local, acompanhamento e agentes da prisão.',violencia:'Apure agressão, maus-tratos, tortura, autores e identificação.',exame:'Registre exame de corpo de delito, presença policial, transporte e tempo de condução.',delegacia:'Documente recepção, oitiva, leitura de documentos, direitos, fiança, água e alimentação.',partes:'Registre perguntas, controle da legalidade e pedidos do Ministério Público e da defesa.',decisao:'Registre decisão, explicação, providências por agressão, comunicações e encaminhamentos.',documentos:'Gere o relatório, o relatório BNMP, a decisão final e o termo de audiência em formato de ata.'}[id]||''}
+function card(f){const c=document.createElement('div');c.className='card'+(f.type==='action'?' action-card':'');c.id='card_'+f.id;c.innerHTML='<div class="question"><span class="num">'+esc(f.n)+'</span>'+esc(f.label)+(f.required?'<span class="req"> *</span>':'')+'</div><div class="hint">Registro em tempo real • sequência preservada do roteiro</div>';const v=answers[f.id];
+ if(f.type==='choice'||f.type==='multiselect'){const d=document.createElement('div');d.className='options';f.options.forEach(o=>{const b=document.createElement('button');b.className='option';if(Array.isArray(v)?v.includes(o):v===o)b.classList.add('selected');b.textContent=o;b.onclick=()=>{if(f.type==='multiselect'){let a=Array.isArray(answers[f.id])?[...answers[f.id]]:[];a.includes(o)?a=a.filter(x=>x!==o):a.push(o);answers[f.id]=a}else {answers[f.id]=o;if(f.id==='q3'){answers.q4=[];answers.q5=[]}if(f.id==='q11'&&!started){started=new Date();ended=null}};refresh()};d.appendChild(b)});c.appendChild(d)}
+ else if(f.type==='select'){const s=document.createElement('select');let opts=f.options;s.innerHTML='<option value="">Selecione</option>'+opts.map(o=>'<option>'+esc(o)+'</option>').join('');s.value=v||'';s.onchange=e=>{answers[f.id]=e.target.value;refresh()};c.appendChild(s)}
+ else if(f.type==='countryautocomplete'){const wrap=document.createElement('div');wrap.style.position='relative';const i=document.createElement('input');i.className='field';i.placeholder=f.placeholder||'Comece a digitar o país';i.value=v||'';i.autocomplete='off';const list=document.createElement('div');list.className='city-list';i.oninput=e=>{answers[f.id]=e.target.value;renderCountrySuggestions(e.target.value,list,i,f.id);update()};i.onfocus=()=>renderCountrySuggestions(i.value,list,i,f.id);wrap.appendChild(i);wrap.appendChild(list);const source=document.createElement('div');source.className='hint';source.innerHTML='Base de referência: <a href="https://paises.ibge.gov.br/#/" target="_blank" rel="noopener">IBGE — Países</a>. Digite para localizar imediatamente.';wrap.appendChild(source);c.appendChild(wrap)}
+ else if(f.type==='lawmulti'){
+ const wrap=document.createElement('div');let selected=Array.isArray(v)?[...v]:(v?[v]:[]);
+ const official=document.createElement('div');official.style.cssText='border:1px solid #d8e2ee;border-radius:12px;padding:10px;margin-bottom:12px;background:#f8fbff';
+ official.innerHTML='<div class="hint"><b>Pesquisa automática de legislação — Planalto</b></div><div class="subgrid"><input id="planaltoLawSearch" placeholder="Digite o número, ano ou nome da lei"><div id="planaltoLawStatus" class="hint">Digite ao menos 2 caracteres. A ACI-G pesquisa sem abrir outra página.</div></div><div id="planaltoLawResults" class="city-list" style="position:relative;display:none;max-height:220px;margin-top:6px"></div><div class="hint">Fonte oficial configurada: Portal da Legislação da Presidência da República. Em ambiente institucional, a consulta deve ser intermediada pelo servidor da ACI-G para garantir estabilidade e segurança.</div>';
+ const ps=official.querySelector('#planaltoLawSearch'),status=official.querySelector('#planaltoLawStatus'),results=official.querySelector('#planaltoLawResults');
+ let lawTimer=null;
+ const localLawIndex=[...(lawCatalog['Código Penal']||[]),...(lawCatalog['Legislação penal especial']||[])];
+ const normalizeLaw=t=>(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+ const renderLawResults=(items,sourceLabel)=>{results.innerHTML='';if(!items.length){results.style.display='none';status.textContent='Nenhuma correspondência localizada.';return}items.slice(0,20).forEach(x=>{const d=document.createElement('div');d.className='city-item';d.textContent=x;d.onclick=()=>{ps.value=x;results.style.display='none';status.textContent='Legislação selecionada: '+x};results.appendChild(d)});results.style.display='block';status.textContent=sourceLabel};
+ async function searchPlanaltoInline(q){
+   const nq=normalizeLaw(q);
+   const local=localLawIndex.filter(x=>normalizeLaw(x).includes(nq));
+   if(local.length)renderLawResults(local,'Correspondências do catálogo oficial parametrizado na ACI-G.');
+   try{
+     const url='https://www4.planalto.gov.br/legislacao?SearchableText='+encodeURIComponent(q);
+     const r=await fetch(url,{method:'GET',mode:'cors',credentials:'omit'});
+     if(!r.ok)throw new Error('HTTP '+r.status);
+     const txt=await r.text();
+     const doc=new DOMParser().parseFromString(txt,'text/html');
+     const found=[...doc.querySelectorAll('a')].map(a=>(a.textContent||'').trim()).filter(t=>/\b(Lei|Decreto|Código|Decreto-Lei|Medida Provisória)\b/i.test(t)&&normalizeLaw(t).includes(nq));
+     const uniq=[...new Set([...local,...found])];
+     renderLawResults(uniq,'Resultados obtidos na consulta ao Portal da Legislação, sem abrir nova página.');
+   }catch(e){
+     if(!local.length){status.textContent='Consulta direta ao Planalto indisponível neste navegador. O catálogo interno continua disponível; na versão institucional a consulta deve ser feita pelo servidor da ACI-G.'}
+   }
+ }
+ ps.oninput=()=>{clearTimeout(lawTimer);const q=ps.value.trim();if(q.length<2){results.style.display='none';status.textContent='Digite ao menos 2 caracteres. A ACI-G pesquisa sem abrir outra página.';return}lawTimer=setTimeout(()=>searchPlanaltoInline(q),350)};
+ wrap.appendChild(official);
+ let groups=[];
+ if(answers.q3==='Código Penal')groups=[['Código Penal',lawCatalog['Código Penal']||[]]];
+ else if(answers.q3==='Legislação penal especial')groups=[['Legislação penal especial',lawCatalog['Legislação penal especial']||[]]];
+ else if(answers.q3==='Ambas')groups=[['Código Penal',lawCatalog['Código Penal']||[]],['Legislação penal especial',lawCatalog['Legislação penal especial']||[]]];
+ groups.forEach(([title,list])=>{const g=document.createElement('div');g.className='law-group';g.innerHTML='<div class="law-group-title">'+esc(title)+'</div>';list.forEach(law=>{const lab=document.createElement('label');lab.className='law-choice';const cb=document.createElement('input');cb.type='checkbox';cb.checked=selected.includes(law);cb.onchange=()=>{if(cb.checked){if(!selected.includes(law))selected.push(law)}else selected=selected.filter(x=>x!==law);answers[f.id]=selected;let arr=Array.isArray(answers.q5)?answers.q5:[];answers.q5=arr.map(x=>selected.includes(x.lei)?x:Object.assign({},x,{lei:'',tipo:''}));refresh()};lab.appendChild(cb);const sp=document.createElement('span');sp.textContent=law;lab.appendChild(sp);g.appendChild(lab)});wrap.appendChild(g)});
+ if(!groups.length){const h=document.createElement('div');h.className='hint';h.textContent='Selecione primeiro Código Penal, Legislação penal especial ou Ambas.';wrap.appendChild(h)}c.appendChild(wrap)}
+ else if(f.type==='criminalmulti'){
+ const wrap=document.createElement('div');let arr=Array.isArray(v)?v:[{lei:'',tipo:'',artigo:'',paragrafo:'',inciso:'',alinea:''}];
+ while(arr.length<1)arr.push({lei:'',tipo:'',artigo:'',paragrafo:'',inciso:'',alinea:''});
+ const renderCrimes=()=>{wrap.innerHTML='';const selectedLaws=Array.isArray(answers.q4)?answers.q4:[];arr.forEach((item,idx)=>{
+  const box=document.createElement('div');box.style.cssText='border:1px solid #dde4ed;border-radius:13px;padding:12px;margin-top:10px;background:#fafcff';
+  const title=document.createElement('div');title.className='hint';title.textContent='Tipo penal '+(idx+1)+' de 5';box.appendChild(title);
+  const lawSel=document.createElement('select');lawSel.innerHTML='<option value="">Selecione a legislação deste tipo penal</option>'+selectedLaws.map(o=>'<option>'+esc(o)+'</option>').join('');lawSel.value=item.lei||'';lawSel.onchange=e=>{arr[idx].lei=e.target.value;arr[idx].tipo='';answers[f.id]=arr;renderCrimes();update()};box.appendChild(lawSel);
+  const s=document.createElement('select');const list=criminalTypes[item.lei]||['Outro tipo penal — informar manualmente'];s.innerHTML='<option value="">Selecione o tipo penal</option>'+list.map(o=>'<option>'+esc(o)+'</option>').join('');s.value=item.tipo||'';s.onchange=e=>{arr[idx].tipo=e.target.value;answers[f.id]=arr;update()};box.appendChild(s);
+  const g=document.createElement('div');g.className='subgrid';[['artigo','Artigo'],['paragrafo','Parágrafo'],['inciso','Inciso'],['alinea','Alínea']].forEach(([k,p])=>{const i=document.createElement('input');i.placeholder=p;i.value=item[k]||'';i.oninput=e=>{arr[idx][k]=e.target.value;answers[f.id]=arr;update()};g.appendChild(i)});box.appendChild(g);
+  if(idx>0){const rm=document.createElement('button');rm.type='button';rm.className='btn';rm.style.marginTop='8px';rm.textContent='Remover este tipo penal';rm.onclick=()=>{arr.splice(idx,1);answers[f.id]=arr;renderCrimes();update()};box.appendChild(rm)}wrap.appendChild(box)});
+  if(arr.length<5){const add=document.createElement('button');add.type='button';add.className='btn';add.style.marginTop='10px';add.textContent='+ Cadastrar outro tipo penal';add.onclick=()=>{arr.push({lei:'',tipo:'',artigo:'',paragrafo:'',inciso:'',alinea:''});answers[f.id]=arr;renderCrimes();update()};wrap.appendChild(add)}
+  if(selectedLaws.some(x=>/Código Penal/i.test(x))){
+  const cp=document.createElement('div');cp.className='official-search';
+  cp.innerHTML='<div class="hint"><b>Pesquisa de tipos penais no Código Penal — texto oficial do Planalto</b></div><div class="subgrid"><input class="cpArticleSearch" placeholder="Digite o número do artigo, por exemplo: 121"><div class="cpArticleStatus hint">A pesquisa ocorre dentro da ACI-G, sem abrir outra página.</div></div><div class="cpArticleResults city-list" style="position:relative;display:none;max-height:220px;margin-top:6px"></div>';
+  const inp=cp.querySelector('.cpArticleSearch'),st=cp.querySelector('.cpArticleStatus'),res=cp.querySelector('.cpArticleResults');
+  let tt=null;
+  inp.oninput=()=>{clearTimeout(tt);const q=inp.value.trim().replace(/[^0-9A-Za-z-]/g,'');if(!q){res.style.display='none';st.textContent='Digite o número do artigo.';return}tt=setTimeout(async()=>{const fallback=(criminalCatalog['Decreto-Lei nº 2.848/1940 — Código Penal']||criminalCatalog['Código Penal']||[]).filter(x=>x.toLowerCase().includes(('art. '+q).toLowerCase())||x.toLowerCase().includes(('art '+q).toLowerCase()));const draw=(arr,msg)=>{res.innerHTML='';[...new Set(arr)].slice(0,15).forEach(x=>{const d=document.createElement('div');d.className='city-item';d.textContent=x;res.appendChild(d)});res.style.display=arr.length?'block':'none';st.textContent=msg};if(fallback.length)draw(fallback,'Correspondência localizada no catálogo penal parametrizado.');try{const r=await fetch('https://www.planalto.gov.br/ccivil_03/decreto-lei/del2848compilado.htm',{mode:'cors',credentials:'omit'});if(!r.ok)throw new Error();const tx=await r.text();const plain=new DOMParser().parseFromString(tx,'text/html').body.innerText.replace(/\s+/g,' ');const rg=new RegExp('Art\\.?\\s*'+q+'(?:-[A-Z])?\\.?\\s*[-–—]?\\s*([^A]{0,240})','i');const mm=plain.match(rg);if(mm)draw(['Art. '+q+' — '+mm[1].trim().slice(0,180)],'Resultado consultado no texto oficial do Código Penal, sem abrir nova página.');}catch(e){if(!fallback.length)st.textContent='Consulta direta ao Planalto indisponível neste navegador. Na versão institucional, a consulta deve ser feita pelo servidor da ACI-G.'}},350)};
+  wrap.appendChild(cp);
+}
+if(!selectedLaws.length){const h=document.createElement('div');h.className='hint';h.style.marginTop='10px';h.textContent='Selecione uma ou mais legislações no campo anterior.';wrap.appendChild(h)}
+ };renderCrimes();c.appendChild(wrap)}
+ else if(f.type==='dateanswer'||f.type==='datetimeanswer'){const d=document.createElement('div');const i=document.createElement('input');i.className='field';i.type=f.type==='dateanswer'?'date':'datetime-local';i.value=(v&&v.valor)||'';i.oninput=e=>{answers[f.id]={valor:e.target.value,status:'Respondeu'};update()};d.appendChild(i);const os=document.createElement('div');os.className='options';['Não sabe','Não tem condições de responder','Exerceu o direito ao silêncio'].forEach(o=>{const b=document.createElement('button');b.className='option';if(v&&v.status===o)b.classList.add('selected');b.textContent=o;b.onclick=()=>{answers[f.id]={valor:'',status:o};refresh()};os.appendChild(b)});d.appendChild(os);c.appendChild(d)}
+ else if(f.type==='action'){const b=document.createElement('button');b.className='generate';if(f.id==='q136_termo_ata'||f.action_kind==='minutes'){b.textContent='GERAR TERMO DE AUDIÊNCIA';b.onclick=generateHearingMinutes}else if(f.id==='q137_repositorio'||f.action_kind==='repository'){b.textContent='DECISÃO – REPOSITÓRIO';b.onclick=openDecisionRepository}else if(f.id==='q137_publicada'||f.action_kind==='published_decision'){b.textContent='DECISÃO PUBLICADA';b.onclick=openPublishedDecision;b.disabled=false}else{b.textContent='GERAR DECISÃO FINAL';b.onclick=generateDecision}c.appendChild(b)}
+ else {const e=document.createElement(f.type==='textarea'?'textarea':'input');if(f.type!=='textarea')e.type=f.type||'text';e.className='field';if(f.max_pages){e.style.minHeight='320px';e.style.resize='vertical';e.setAttribute('data-max-pages',String(f.max_pages));}e.placeholder=f.placeholder||'';e.value=v||'';e.oninput=x=>{answers[f.id]=x.target.value;update()};c.appendChild(e);if(['text','textarea'].includes(f.type)||f.placeholder?.toLowerCase().includes('espaço para escrever'))addSpellTools(f.id,e,c)}
+ c.style.display=visible(f)?'block':'none';return c}
+function refresh(){schema.fields.forEach(f=>{const o=document.getElementById('card_'+f.id);if(o)o.replaceWith(card(f))});update()}
+function show(i){current=Math.max(0,Math.min(schema.sections.length-1,i));document.querySelectorAll('.stage').forEach((x,j)=>x.classList.toggle('active',j===current));document.querySelectorAll('.step').forEach((x,j)=>x.classList.toggle('active',j===current));currentName.textContent=schema.sections[current].title;scrollTo({top:0,behavior:'smooth'});update()}
+
+function requiredPendingUniverse(){
+ return schema.fields.filter(f=>f.required&&visible(f)&&f.type!=='action');
+}
+function requiredPendingFields(){
+ return requiredPendingUniverse().filter(f=>!has(answers[f.id]));
+}
+let pendingCursor=-1;
+function focusPendingField(field){
+ if(!field)return;
+ const sectionIndex=schema.sections.findIndex(s=>s.id===field.section);
+ if(sectionIndex>=0){
+  current=sectionIndex;
+  document.querySelectorAll('.stage').forEach((x,j)=>x.classList.toggle('active',j===current));
+  document.querySelectorAll('.step').forEach((x,j)=>x.classList.toggle('active',j===current));
+  currentName.textContent=schema.sections[current].title;
+ }
+ requestAnimationFrame(()=>{
+  const cardEl=document.getElementById('card_'+field.id);
+  if(!cardEl)return;
+  cardEl.classList.remove('pending-focus');
+  void cardEl.offsetWidth;
+  cardEl.classList.add('pending-focus');
+  cardEl.scrollIntoView({behavior:'smooth',block:'center'});
+  const control=cardEl.querySelector('input,textarea,select,button');
+  if(control)setTimeout(()=>control.focus({preventScroll:true}),450);
+  setTimeout(()=>cardEl.classList.remove('pending-focus'),1800);
+ });
+ update();
+}
+function goToNextPending(){
+ const missing=requiredPendingFields();
+ if(!missing.length){
+  pendingCursor=-1;
+  return;
+ }
+ pendingCursor=(pendingCursor+1)%missing.length;
+ focusPendingField(missing[pendingCursor]);
+}
+function setupPendingNavigation(){
+ const pm=document.getElementById('pendingMetric');
+ if(!pm||pm.dataset.ready==='1')return;
+ pm.dataset.ready='1';
+ pm.addEventListener('click',goToNextPending);
+ pm.addEventListener('keydown',e=>{
+  if(e.key==='Enter'||e.key===' '){
+   e.preventDefault();
+   goToNextPending();
+  }
+ });
+}
+
+function next(){show(current+1)}function prev(){show(current-1)}
+const igacAskedFields=["q39", "q43", "q44", "q47", "q49", "q50", "q52", "q54", "q55", "q57", "q58", "q59", "q60", "q61", "q62", "q63", "q64", "q66", "q67", "q68", "q69", "q70", "q74", "q76", "q77", "q78", "q80", "q82", "q83"];
+const igacPositiveValues={"q17": ["Sim"], "q18": ["Sim"], "q19": ["Sim"], "q20": ["Justificativa normativa", "Justificativa excepcional"], "q21": ["Sim"], "q22": ["Sim"], "q23": ["Sem algemas", "Permaneceu com algemas — com justificativa"], "q27": ["Sim"], "q30": ["Sim"], "q71": ["Sim"], "q86": ["Sim"], "q87": ["Sim"], "q89": ["Não"], "q92": ["Sim", "Não"], "q104": ["Sim"], "q110": ["Sim"], "q114": ["Sim"], "q121": ["Sim"]};
+function igacValueText(v){
+ if(Array.isArray(v))return v.join(' | ');
+ if(v&&typeof v==='object')return JSON.stringify(v);
+ return String(v??'');
+}
+function guaranteePoint(id,v){
+ if(!has(v))return 0;
+ if(igacAskedFields.includes(id))return 1;
+ const allowed=igacPositiveValues[id];
+ if(allowed){
+  const s=igacValueText(v);
+  return allowed.some(x=>s===x||s.startsWith(x+' —'))?1:0;
+ }
+ return 0;
+}
+function applicableIGACFields(){
+ return igacFields.filter(id=>{
+  const f=schema.fields.find(x=>x.id===id);
+  return !!f && visible(f);
+ });
+}
+function calculateIGACDetails(){
+ const applicable=applicableIGACFields();
+ let points=0,answered=0;
+ applicable.forEach(id=>{
+  if(has(answers[id]))answered++;
+  points+=guaranteePoint(id,answers[id]);
+ });
+ return {points,total:applicable.length,answered,percent:applicable.length?(points/applicable.length*100):0};
+}
+function calculateIGAC(){return calculateIGACDetails().percent}
+function update(){clock.textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});elapsed.textContent=elapsedText();const req=requiredPendingUniverse(),done=req.filter(f=>has(answers[f.id]));const p=req.length?Math.round(done.length/req.length*100):0;percent.textContent=p+'%';progress.style.width=p+'%';pending.textContent=req.length-done.length;
+const pendingCount=req.length-done.length;
+const pm=document.getElementById('pendingMetric');
+const ph=document.getElementById('pendingHelp');
+if(pm){
+ pm.classList.toggle('pending-clear',pendingCount===0);
+ pm.title=pendingCount
+   ? 'Clique para ir à próxima pendência obrigatória ('+pendingCount+' restante'+(pendingCount===1?'':'s')+').'
+   : 'Audiência sem pendências obrigatórias.';
+}
+if(ph)ph.textContent=pendingCount?'Clique para revisar':'Tudo preenchido';
+setupPendingNavigation();
+syncPublishedDecisionButton();
+const igd=calculateIGACDetails(),ig=igd.percent;score.textContent=ig.toFixed(1).replace('.',',')+'%';igacTop.textContent=ig.toFixed(1).replace('.',',')+'%';if(document.getElementById('igacCount'))igacCount.textContent=igd.points+'/'+igd.total;caseProcess.textContent=answers.q2?'Processo '+answers.q2:'Processo ainda não informado';caseCourt.textContent=[answers.q6,answers.q7].filter(Boolean).join(' • ')||'Comarca e unidade pendentes';caseCrime.textContent=(answers.q5&&answers.q5.tipo)||answers.q4||'Tipificação ainda não selecionada';casePrison.textContent=answers.q14||'Tipo de prisão pendente';document.querySelectorAll('.step').forEach((x,i)=>{const r=requiredPendingUniverse().filter(f=>f.section===schema.sections[i].id);x.classList.toggle('done',r.length>0&&r.every(f=>has(answers[f.id])))});renderGuarantees()}
+function renderGuarantees(){const it=[['q1','Entrevista reservada inicial'],['q11','Apresentação do julgador'],['q13','Vedação de perguntas de mérito'],['q22','Prazo de 24 horas'],['q27','Entrevista reservada confirmada'],['q30','Direito ao silêncio'],['q78','Violência investigada'],['q86','Corpo de delito'],['q104','Silêncio na prisão'],['q114','Contraditório'],['q126','Decisão registrada']];guarantees.innerHTML=it.map(([id,t])=>'<div class="guarantee '+(has(answers[id])?'ok':'warn')+'"><div class="gicon">'+(has(answers[id])?'✓':'•')+'</div><div class="gtext"><b>'+t+'</b>'+(has(answers[id])?'Concluído':'Pendente')+'</div></div>').join('');let a='Nenhum alerta crítico.';if(answers.q78==='Sim'&&!has(answers.q125))a='Relato de agressão sem providência judicial registrada.';else if(answers.q89==='Sim'&&answers.q92==='Não')a='Policiais permaneceram no exame sem solicitação médica.';alertText.textContent=a}
+function valueText(v){if(Array.isArray(v)){if(v.length&&typeof v[0]==='object')return v.map((x,i)=>(i+1)+'. '+Object.values(x).filter(Boolean).join(' | ')).join('; ');return v.join('; ')}if(v&&typeof v==='object')return Object.values(v).filter(Boolean).join(' | ');return v}
+function relatedTextFields(parentId){
+ const map={
+  q31:['q31_text','q31_cpf','q31_cpf_text'],
+  q32:['q32_text'],q34:['q34_city'],q36:['q36_pai','q36_mae'],
+  q37:['q37_text'],q38:['q38_text'],q41:['q41_text'],q43:['q43_months'],
+  q48:['q48_full','q48_name'],q72:['q72_text'],q74:['q74_name'],q115_outras_perguntas:['q115_outras_perguntas_text'],q119_citacao_cpp:['q119_citacao_cpp_processos'],
+  q85:['q85_text'],q112:['q112_text'],q57:['q57_med'],q58:['q58_doenca'],q59:['q59_infecto'],q60:['q60_dst'],q61:['q61_necessidade'],q62:['q62_transtorno'],q126:['q126_outra_decisao','q126_f1','q126_f2','q126_f3','q126_f4','q126_f5','q126_f6','q126_f7'],q127:['q127_outro_orgao'],q128:['q128_outro_encaminhamento'],q129_alvara:['q129_alvara_motivo','q129_alvara_monitor_motivo','q132_1_mandado']
+ };
+ return map[parentId]||[];
+}
+function appendFieldAndRelated(lines,f){
+ lines.push(f.n+'. '+f.label+': '+valueText(answers[f.id]));
+ relatedTextFields(f.id).forEach(id=>{
+  const rf=schema.fields.find(x=>x.id===id);
+  if(rf&&visible(rf)&&has(answers[id])) lines.push('   ↳ '+rf.label+': '+valueText(answers[id]));
+ });
+}
+function isRelatedTextField(id){
+ return Object.values({
+  q31:['q31_text','q31_cpf','q31_cpf_text'],q32:['q32_text'],q34:['q34_city'],
+  q36:['q36_pai','q36_mae'],q37:['q37_text'],q38:['q38_text'],q41:['q41_text'],
+  q43:['q43_months'],q48:['q48_full','q48_name'],q72:['q72_text'],q74:['q74_name'],q115_outras_perguntas:['q115_outras_perguntas_text'],q119_citacao_cpp:['q119_citacao_cpp_processos'],
+  q85:['q85_text'],q112:['q112_text'],q57:['q57_med'],q58:['q58_doenca'],q59:['q59_infecto'],q60:['q60_dst'],q61:['q61_necessidade'],q62:['q62_transtorno'],q126:['q126_outra_decisao','q126_f1','q126_f2','q126_f3','q126_f4','q126_f5','q126_f6','q126_f7'],q127:['q127_outro_orgao'],q128:['q128_outro_encaminhamento'],q129_alvara:['q129_alvara_motivo','q129_alvara_monitor_motivo','q132_1_mandado']
+ }).flat().includes(id);
+}
+
+function selectedBlocks(){return Array.isArray(answers.q129)?answers.q129:[]}
+function reportLines(){let l=['RELATÓRIO ESTRUTURADO DA AUDIÊNCIA DE CUSTÓDIA','Processo: '+(answers.q2||'[não informado]'),'Comarca: '+(answers.q6||'[não informada]'),'Unidade: '+(answers.q7||'[não informada]'),'Tempo decorrido: '+elapsedText(),'IGAC alcançado: '+calculateIGAC().toFixed(1).replace('.',',')+'% ('+calculateIGACDetails().points+'/'+calculateIGACDetails().total+' garantias aplicáveis; '+calculateIGACDetails().answered+' verificações respondidas)'];schema.sections.forEach(s=>{l.push('\n'+s.title.toUpperCase());schema.fields.filter(f=>f.section===s.id&&f.type!=='action'&&visible(f)&&has(answers[f.id])&&!isRelatedTextField(f.id)).forEach(f=>appendFieldAndRelated(l,f))});return l}
+
+
+const decisionRepositoryTemplates={"1": {"title": "DR1 Homologo a prisão e converto em preventiva", "body": "É relatório. Decido. DO AUTO DE PRISÃO EM FLAGRANTE. No caso, o flagrado(a) foi preso(a) em flagrante delito cometendo uma suposta infração penal, conforme consta do auto de prisão em flagrante, evidenciando a situação de flagrância. O auto foi devidamente instruído com Termos de depoimentos e interrogatório, Registro de Atendimento Integrado, relatório médico, outros documentos pertinentes ao ato, despacho de ratificação de voz de prisão, ofícios comunicatórios da prisão, nota de culpa e guia de recolhimento de preso. Para o momento o Juiz deve avaliar se estão presentes os requisitos do art. 302 e art. 313 do Código de Processo Penal e neste momento vejo como correto o auto de prisão em flagrante. Assim, na presente situação, não vislumbro, de plano, qualquer irregularidade, razão pela qual declaro formalmente em ordem o auto de prisão em flagrante. DAS MEDIDAS CAUTELARES. INSUFICIÊNCIA. As Medidas Cautelares tem o escopo de se criar alternativas ao cárcere no âmbito da investigação criminal e no curso do processo-crime. Os requisitos legais para a aplicação das Medidas Cautelares estão fulcradas, basicamente, na necessidade e na adequação. No caso, há indícios de que o(a) autuado(a) estava supostamente a cometer infração penal, em um caso e situação que considero grave. Deste modo, tenho que a aplicação de medida cautelar ao(a) flagranteado(a) não se mostra adequada e nem tão pouco suficientes. DA PRISÃO PREVENTIVA. Em verdade conforme contemplado na Constituição brasileira o estado prisão deve ser uma exceção para a proteção da sociedade e às vezes do próprio preso. Em relação aos pressupostos para a decretação da prisão preventiva, como antecedente indispensável à aplicação da medida extrema, estes passam a ser de três ordens cumulativas: I - prova da existência do crime; II - indícios sérios de autoria; III - ineficácia inadequação ou insuficiência das medidas cautelares. Os requisitos da preventiva, como exigência de validade do ato, conforme artigo 312 do Código de Processo Penal são: a) garantir a ordem pública ou econômica, b) assegurar a aplicação da lei penal, ou c) necessidade da instrução criminal. No caso, é certo que o decreto de prisão apresenta dados concretos a justificar a preservação da segregação cautelar com base na ordem pública e garantia de aplicação da lei penal. Explico. Quanto à prova da existência do crime, bem como sua autoria, ao menos por ora, fortes são os indícios coletados no auto de flagrante a evidenciarem a autoria do autuado(a) no seu cometimento, haja vista que foi preso em flagrante delito, cometendo o crime grave, bem como da insuficiência das medidas cautelares diferentes de prisão. Verifico que ao(a) custodiado(a) presente está o requisito para a aplicação da lei penal, a manutenção da segregação cautelar do custodiado é media que se impõe. Por outro vértice, a liberdade precoce, se propiciada neste momento, representa risco concreto à ordem pública, mormente considerando a gravidade do caso concreto em um contexto de coletividade, pois é deletério à ordem pública. Estão, pois, presentes os requisitos do artigo 312 do Código de Processo Penal. Destarte, necessária a custódia preventiva, ao menos no nascedouro do procedimento criminal, ainda na fase policial. Desta forma, presentes os requisitos da prisão preventiva, HOMOLOGO o auto de prisão em flagrante, por estar em ordem, indefiro o pedido de devolução da liberdade ao(a) custodiado(a) e CONVERTO a prisão em flagrante do custodiado(a), já qualificado(a). Registre-se que prescrição ocorrerá nos temos do art. 109 ao 117 do Código Penal. DETERMINAÇÕES: [Buscar automaticamente as terminações do campo das determinações.] Oficie-se e intime-se. Determino a inclusão e a publicação da presente audiência no Sistema BNMP 3.0. Cumprida por este Juízo a realização da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Aguarde-se a vinda do Inquérito Policial. Saem os representes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se.” Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Assistente de audiência), Assistente de Juiz, que o fiz digitar e subscrevo."}, "2": {"title": "DR 2 Relaxo a prisão", "body": "É relatório. Decido. DO AUTO DE PRISÃO EM FLAGRANTE. No caso, O(a) flagrado(a) foi preso(a) em flagrante delito supostamente cometendo infração penal. O auto foi devidamente instruído com depoimento das testemunhas, interrogatório da flagrada e nota de culpa. No presente caso observa-se fatos intransponíveis capazes de dar ao auto de prisão em flagrante a legalidade esperada e necessária para ser homologado, motivo pelo qual deve ser declarado nulo. Desta forma, DECLARO NULA A PRISÃO EM FLAGRANTE e RELAXO a prisão do(a) custodio(a) já devidamente nominado(a) e qualificado(a) acima. DETERMINAÇÕES: Expeça-se alvará de soltura em favor do(a) acusado(a). Oficie-se e intime-se. Determino a inclusão e a publicação da presente audiência no Sistema BNMP3.0. Cumprida por este Juízo a realização da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Aguarde-se a vinda do Inquérito Policial. Saem os representes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se.” Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Ariana Balestra de Macedo e Silva), Assistente de Juiz, que o fiz digitar e subscrevo."}, "3": {"title": "DR3 Homologo e concedo a liberdade com cautelares e fiança", "body": "É relatório. Decido. DO AUTO DE PRISÃO EM FLAGRANTE. No caso, o flagrado foi preso em flagrante delito logo após cometer uma suposta infração penal, consubstanciada em suposto(a) crime constante no auto de prisão em flagrante. O auto foi devidamente instruído com depoimento das testemunhas, interrogatório do flagrado, exame de corpo de delito e nota de culpa. Assim, na presente situação, não vislumbro, de plano, qualquer irregularidade, razão pela qual declaro formalmente em ordem o auto de prisão em flagrante. DA LIBERDADE PROVISÓRIA COM FIANÇA. Em verdade conforme contemplado na Constituição brasileira o estado prisão deve ser uma exceção para a proteção da sociedade e às vezes do próprio preso. Em relação aos pressupostos para a decretação da prisão preventiva, como antecedente indispensável à aplicação da medida extrema, estes passam a ser de três ordens cumulativas: I - prova da existência do crime; II - indícios sérios de autoria; III - ineficácia inadequação ou insuficiência das medidas cautelares. Os requisitos da preventiva, como exigência de validade do ato, conforme artigo 312 do Código de Processo Penal são: a) garantir a ordem pública ou econômica, b) assegurar a aplicação da lei penal, ou c) necessidade da instrução criminal. Analisando o presente Auto de Prisão em Flagrante, vejo que existe a notícia de crime, indícios de autoria e materialidade. Neste momento deve o Juiz analisar se as medidas cautelares são suficientes. Quanto a ordem pública não verifico estar presente de forma concreta. Quanto a aplicação da lei penal, também não vejo estar presente, pois as condições pessoais não ensejam tal necessidade. Em relação a instrução criminal, também, não veja estar presente tal requisito. Assim, entendo que as medidas cautelares diversas da prisão são o bastante para o presente caso, bem como mediante a prestação de fiança, a qual, em virtude da situação financeira do custodiado, nos termos do artigo 325 e seguinte do Código de Processo Penal. Destaco, ainda, que o benefício da liberdade provisória com ou sem fiança não é definitivo, podendo ser revogado a qualquer tempo, se porventura uma de suas condições vier a ser descumprida pelo beneficiado. De igual modo, não está demonstrada a hipossuficiência financeira apta a afastar o arbitramento de fiança. Isto posto, pelas razões aqui declinadas, HOMOLOGO o flagrante e concedo a liberdade provisória ao custodiado, já devidamente qualificado, mediante o recolhimento do valor da fiança arbitrada por este Juízo para R$ X.XXX,XX ( ) e condicionada às seguintes medidas: condicionada às seguintes medidas: 1 – Comparecimento mensal em juízo, até o dia 10 de cada mês, no Cartório Criminal da Comarca onde será processado, para informar e justificar suas atividades, bem como endereço; 2 – Proibição de ausentar-se da Comarca onde está sendo processado por mais de 05 (cinco) dias, sem autorização prévia do Juízo; 3 – Comparecer a todos os atos da instrução criminal, quando regularmente intimado, bem como informar qualquer alteração de endereço; 4 – Monitoramento eletrônico; 5 – Outras medidas cautelares. DETERMINAÇÕES: À Secretaria do Plantão de audiência de custódia, para que expeça e anexe ao processo guia para pagamento de fiança, a fim de que o advogado possa retirá-la e efetuar o pagamento.  Recolhida a fiança, expeça-se alvará de soltura em favor do custodiado, já qualificado, colocando-o imediatamente em liberdade, salvo se por outro motivo deva permanecer preso. Cientifique-se o autuado de que o descumprimento das medidas cautelares impostas poderá implicar, dentre outras medidas, na decretação de sua prisão preventiva (artigo 282, § 4º, da Lei n. 12.403/11). Determino a inclusão e a publicação da presente audiência no Sistema BNMP3.0. Cumprida por este Juízo a realização presencial da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Aguarde-se a vinda do Inquérito Policial. Saem os representes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se.” Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Assistente de audiência), que o fiz digitar e subscrevo."}, "4": {"title": "DR 4 Homologo e concedo a liberdade com cautelares, sem fiança", "body": "É relatório. Decido. DO AUTO DE PRISÃO EM FLAGRANTE. No caso, o(a) flagrado(a) foi preso(a) em flagrante delito cometendo uma suposta infração penal, conforme contante do auto de prisão em flagrante, evidenciando a situação de flagrância. O auto foi devidamente instruído com depoimento das testemunhas, interrogatório do(a) flagrado(a) e nota de culpa. Noticiou o(a) custodiado(a) que teve seus direitos mínimos preservados e não sofreu agressão física e nem ficou privado(a) de água e alimentação. Assim, na presente situação, não vislumbro, de plano, qualquer irregularidade, razão pela qual declaro formalmente em ordem o auto de prisão em flagrante. DA LIBERDADE PROVISÓRIA SEM FIANÇA. Em verdade conforme contemplado na Constituição brasileira o estado prisão deve ser uma exceção para a proteção da sociedade e às vezes do próprio preso. Em relação aos pressupostos para a decretação da prisão preventiva, como antecedente indispensável à aplicação da medida extrema, estes passam a ser de três ordens cumulativas: I - prova da existência do crime; II - indícios sérios de autoria; III - ineficácia inadequação ou insuficiência das medidas cautelares. Os requisitos da preventiva, como exigência de validade do ato, conforme artigo 312 do Código de Processo Penal são: a) garantir a ordem pública ou econômica, b) assegurar a aplicação da lei penal, ou c) necessidade da instrução criminal. Analisando o presente Auto de Prisão em Flagrante, vejo que não estão presentes os requisitos da prisão preventiva e, tendo em vista que o crime não foi cometido com extrema violência, cabível, na espécie, a concessão de liberdade provisória. Quanto ao requisito da conveniência da instrução vejo que não tem alcance ou influência sobre as testemunhas. Quanto a aplicação da lei penal vejo que, também, não se encontram presentes. Em relação a ordem pública, temos que aplicar de forma concreta e não de forma abstrata quando não se sabe amplitude dos efeitos e consequências dos fatos. Destaco, ainda, que o benefício da liberdade provisória não é definitivo, podendo ser revogado a qualquer tempo, se porventura uma de suas condições vier a ser descumprida pela beneficiada. Isto posto, pelas razões aqui declinadas, HOMOLOGO o flagrante e concedo a liberdade provisória ao autuado(a), já qualificado(a) condicionada às seguintes medidas: condicionada às seguintes medidas: 1 – Comparecimento mensal em juízo, até o dia 10 de cada mês, no Cartório Criminal da Comarca onde será processado, para informar e justificar suas atividades, bem como endereço; 2 – Proibição de ausentar-se da Comarca onde está sendo processado por mais de 10 (dez) dias, sem autorização prévia do Juízo; 3 – Comparecer a todos os atos da instrução criminal, quando regularmente intimada, bem como informar qualquer alteração de endereço. 4 - Uso de tornozeleira eletrônica. Registre-se que caso a Central de Monitoramento informe neste processo a indisponibilidade da tornozeleira, determino, desde já, que a acusada seja imediatamente colocada em liberdade, com a ressalva de que a Equipe de Monitoramento ficará responsável por realizar a colocação do equipamento, tão logo haja tornozeleira disponível, mediante intimação do acusado para comparecimento à respectiva Central ou deslocamento até a residência da acusada. Expeça-se alvará de soltura em favor do(a) custodiado(a), já qualificado(a), colocando-o(a) imediatamente em liberdade, salvo se por outro motivo deva permanecer preso(a). Cientifique-se o(a) autuado(a) de que o descumprimento das medidas cautelares impostas poderá implicar, dentre outras medidas, na decretação de sua prisão preventiva (artigo 282, § 4º, da Lei n. 12.403/11). Determino: [Determinações – puxar automaticamente as determinações – do campo determinação]. Oficie-se e intime-se. Determino a inclusão e a publicação da presente audiência no Sistema BNMP 3.0. Cumprida por este Juízo a realização da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Aguarde-se a vinda do Inquérito Policial. Saem os representes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se. Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Assistente de audiência), Assistente de Juiz, que o fiz digitar e subscrevo."}, "5": {"title": "DR 5 Homologo a prisão e mantenho a prisão decretada", "body": "É o relatório. Decido. O presente caso refere-se à Comunicação de Cumprimento do mandado de prisão conforme documentos narra a autoridade comunicante. Pois bem, neste ato de apresentação de preso(a) ao Juízo, verifico a regularidade no cumprimento do mandado de prisão. Assim, inexistindo notícias de violência em desfavor do(a) custodiado(a), não verifiquei situação alguma capaz de macular a prisão, não tendo o(a) preso(a) noticiado nenhuma agressão física e informando saber os motivos de sua prisão. Em verdade, o presente processo deve retornar para o juiz natural da causa para apreciar a necessidade de manutenção da prisão outrora decretada, eis que este Juízo que deve se ater apenas a irregularidade da prisão do(a) custodiado(a), o que não me parece acontecer no presente caso. DETERMINAÇÕES: Determino a imediata comunicação ao juízo expedidor da ordem de prisão, sobre o cumprimento do mandado de prisão e a realização da audiência de apresentação de preso ao juízo (audiência de custódia). Fica o(a) custodiado(a) à disposição da Vara expedidora do mandado. Determino a inclusão e a publicação da presente audiência no Sistema BNMP 3.0. Cumprida por este Juízo a realização da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Saem os representes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se.” Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Assistente de audiência), Assistente de Juiz, que o fiz digitar e subscrevo."}, "6": {"title": "DR 6 (Homologo a prisão e revogar a prisão decretada anteriormente)", "body": "É o relatório. Decido. O presente caso refere-se à Comunicação de Cumprimento do mandado de prisão conforme documentos narra a autoridade comunicante. Pois bem, neste ato de apresentação de preso(a) ao Juízo, verifico a regularidade no cumprimento do mandado de prisão. Assim, inexistindo notícias de violência em desfavor do(a) custodiado(a), não verifiquei situação alguma capaz de macular a prisão, não tendo o(a) preso(a) noticiado nenhuma agressão física e informando saber os motivos de sua prisão. Em verdade, o presente processo deve retornar para o juiz natural da causa para apreciar a necessidade de manutenção da prisão outrora decretada, eis que este Juízo que deve se ater apenas a irregularidade da prisão do(a) custodiado(a), o que não me parece acontecer no presente caso. Por outro lado verifica-se que existe fato específico que o(a) custodiado(a) deve ser colocado(a) em liberdade, pois a manutenção da prisão é desproporcional e injusta neste momento. DETERMINAÇÕES: Determino a imediata comunicação ao juízo expedidor da ordem de prisão, sobre o cumprimento do mandado de prisão e a realização da audiência de apresentação de preso ao juízo (audiência de custódia). O custodiado(a) foi colocado(a) em liberdade. Fica o(a) custodiado(a) à disposição da Vara expedidora do mandado. Determino a inclusão e a publicação da presente audiência no Sistema BNMP 3.0. Cumprida por este Juízo a realização da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Saem os representes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se.” Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Assistente de audiência), Assistente de Juiz, que o fiz digitar e subscrevo."}, "7": {"title": "DR 7 Homologo a prisão civil e revogo a prisão, uma vez comprovado o pagamento do valor do mandado", "body": "É o relatório. Decido. O presente caso refere-se a Comunicação de Cumprimento de Mandado de Prisão expedido pelo Juízo da Vara de Família, em desfavor do(a) custodiado(a). Neste ato de apresentação de preso ao Juízo, não verifiquei situação alguma capaz de ensejar a revogação da prisão. A ordem está amparada em decisão escrita e fundamentada de autoridade judiciária competente, tendo sido observadas as formalidades legais quanto à entrega de cópia do mandado e à realização de exame médico. Assim HOMOLOGO a prisão do custodiado. Assim ao que tudo indica após uma análise conjunta tanto deste Juízo quanto do Ministério Público e da Defesa, verificamos que foram pagas todas as parcelas. Assim, acompanho o pedido do Ministério Público e da Defesa e REVOGO A PRISÃO do custodiado(a), já devidamente nominado(a) e qualificado(a) se por outro motivo não deva permanecer preso. Expeça-se o competente alvará de soltura.  Oficie-se ao Juízo expedidor da ordem prisional, comunicando-lhe o cumprimento do respectivo mandado de prisão civil, o local de recolhimento do custodiado e a realização desta audiência de apresentação de preso ao juízo (audiência de custódia), para as providências que entender pertinentes. Determino a inclusão e a publicação da presente audiência no Sistema SISTAC, Sistema de Audiência de Custódia do Conselho Nacional de Justiça, bem como no Sistema BNMP 3.0. Cumprida por este Juízo a realização da audiência de custódia, determino à Escrivania do Plantão que faça a redistribuição do processo para o expediente. Saem os representantes intimados. Publique-se. Registre-se. Intime-se. Cumpra-se.\" Nada mais havendo, encerrou-se a presente. Saem todos cientes e intimados deste ato. Eu_______(Amanda Borges Monteiro), Assistente de Juiz, que o fiz digitar e subscrevo."}, "8": {"title": "DR 8 Profiro outra decisão — Relatório do Processo ou incluir um novo modelo", "body": ""}};
+
+function fieldTextForRepo(id){
+ const f=schema.fields.find(x=>x.id===id);
+ if(!f||!visible(f)||!has(answers[id]))return '';
+ return f.label+': '+valueText(answers[id]);
+}
+function repoRange(minN,maxN){
+ return schema.fields.filter(f=>{
+  const n=parseFloat(String(f.n).replace(',','.'));
+  return Number.isFinite(n)&&n>=minN&&n<=maxN&&f.type!=='action'&&visible(f)&&has(answers[f.id])&&!isRelatedTextField(f.id);
+ }).map(f=>{
+  const line=fieldTextForRepo(f.id);
+  const related=relatedTextFields(f.id).filter(id=>has(answers[id])).map(id=>fieldTextForRepo(id));
+  return [line,...related].filter(Boolean).join('; ');
+ }).filter(Boolean);
+}
+function repositoryReportText(){
+ const selected=Array.isArray(answers.q129)?answers.q129:[];
+ const out=[];
+ out.push('ATA DE AUDIÊNCIA DE CUSTÓDIA ACI-G');
+ if(has(answers.q2))out.push('Processo: '+answers.q2+'.');
+ if(has(answers.q31_text))out.push('Pessoa custodiada: '+answers.q31_text+'.');
+
+ const add=(title,lines)=>{
+  const clean=(lines||[]).filter(Boolean);
+  if(clean.length)out.push(title+': '+clean.join('; ')+'.');
+ };
+
+ if(selected.includes('Dados do processo')){
+  add('Dados do processo',[
+   fieldTextForRepo('q2'),fieldTextForRepo('q2_doc_policial'),fieldTextForRepo('q7'),
+   fieldTextForRepo('q8'),fieldTextForRepo('q9'),fieldTextForRepo('q10'),
+   fieldTextForRepo('q10_nome'),fieldTextForRepo('q11'),fieldTextForRepo('q12')
+  ]);
+ }
+ if(selected.includes('Dados da legislação e tipificação')){
+  add('Legislação e tipificação',[
+   fieldTextForRepo('q3'),fieldTextForRepo('q4'),fieldTextForRepo('q5')
+  ]);
+ }
+ if(selected.includes('Dados pessoais do custodiado')){
+  add('Dados pessoais da pessoa custodiada',repoRange(32,45));
+ }
+ if(selected.includes('Dados familiares do custodiado')){
+  add('Dados familiares da pessoa custodiada',repoRange(46,54.1));
+ }
+ if(selected.includes('Dados de saúde')){
+  add('Dados de saúde',repoRange(55,67));
+ }
+ if(selected.includes('Dados de vulnerabilidade')){
+  add('Dados de vulnerabilidade',repoRange(68,72));
+ }
+ if(selected.includes('Dados do momento da prisão')){
+  add('Dados do momento da prisão',repoRange(73,115));
+ }
+ if(selected.includes('Manifestação do Ministério Público')){
+  add('Manifestação do Ministério Público',[
+    fieldTextForRepo('q115'),fieldTextForRepo('q115_text'),
+    fieldTextForRepo('q118'),fieldTextForRepo('q119')
+  ]);
+ }
+ if(selected.includes('Manifestação da defesa')){
+  add('Manifestação da defesa',[
+    fieldTextForRepo('q116'),fieldTextForRepo('q116_text'),
+    fieldTextForRepo('q117'),fieldTextForRepo('q120')
+  ]);
+ }
+ if(selected.includes('Sem perspectiva')){
+  out.push('Perspectiva adicional: sem perspectiva específica selecionada.');
+ }
+
+ return out.join('\n\n');
+}
+function repositoryDeterminationsText(){
+ const out=[...comandosProvidencias()];
+ if(answers.q129_alvara==='Sim'){
+  out.push('Determino a expedição do alvará'+(answers.q129_alvara_motivo?' pelo seguinte motivo: '+answers.q129_alvara_motivo:'')+'.');
+ }else if(answers.q129_alvara==='Sim — Alvará com mandado de monitoramento eletrônico'){
+  out.push('Determino a expedição de alvará com mandado de monitoramento eletrônico'+(answers.q129_alvara_monitor_motivo?' pelo seguinte motivo: '+answers.q129_alvara_monitor_motivo:'')+'.');
+ }else if(answers.q129_alvara==='Não'&&answers.q132_1_mandado){
+  out.push('Determino a expedição de '+String(answers.q132_1_mandado).toLowerCase()+'.');
+ }
+ return out.join(' ');
+}
+function repositoryParticipantsText(){
+ const juiz=has(answers.q10_nome)?String(answers.q10_nome).trim():'[NOME DO(A) JUIZ(A)]';
+ const promotor=has(answers.q18_nome)?String(answers.q18_nome).trim():'[NOME DO(A) PROMOTOR(A) DE JUSTIÇA]';
+ const defensor=has(answers.q19_nome)?String(answers.q19_nome).trim():'[NOME DO(A) DEFENSOR(A)]';
+ const custodiado=has(answers.q31_text)?String(answers.q31_text).trim():'[NOME DO(A) CUSTODIADO(A)]';
+ return '\n\n'+juiz+'\nJuiz(a) de Direito\n\n'+promotor+'\nPromotor(a) de Justiça\n\n'+defensor+'\nDefensor(a)/Advogado(a)\n\n'+custodiado+'\nCustodiado(a)';
+}
+function repositoryBodyFor(dr){
+ const tpl=decisionRepositoryTemplates[String(dr)]||{body:''};
+ let body=tpl.body||'';
+ const determ=repositoryDeterminationsText();
+
+ body=body.replace(/\[Buscar automaticamente[^\]]*\]/gi,determ||'[DETERMINAÇÕES]');
+ body=body.replace(/\[Determinações[^\]]*\]/gi,determ||'[DETERMINAÇÕES]');
+
+ if(Number(dr)===8){
+  body='PROFIRO OUTRA DECISÃO.\n\n[Digite e edite aqui o conteúdo integral da decisão individualizada. O próprio texto do Repositório constitui a fundamentação desta modalidade.]';
+ }
+ return body;
+}
+function composeRepositoryDecision(dr){
+ const report=repositoryReportText();
+ const body=repositoryBodyFor(dr);
+ return [report,body,repositoryParticipantsText().trim()].filter(Boolean).join('\n\n');
+}
+function repositoryChoiceTitle(dr){
+ const tpl=decisionRepositoryTemplates[String(dr)];
+ return tpl?tpl.title:('DR '+dr);
+}
+function renderRepositoryChoices(){
+ const box=document.getElementById('repoChoices');
+ if(!box)return;
+ box.innerHTML='';
+ const current=Number(answers.q137_repository_choice||0);
+ const published=!!answers.q137_repository_published;
+ for(let dr=1;dr<=8;dr++){
+  const b=document.createElement('button');
+  b.type='button';
+  b.className='repo-choice'+(current===dr?' active':'');
+  b.textContent=repositoryChoiceTitle(dr);
+  b.disabled=published;
+  b.onclick=()=>selectRepositoryModel(dr);
+  box.appendChild(b);
+ }
+}
+function syncRepositoryEditor(){
+ const editor=document.getElementById('repoEditor');
+ const status=document.getElementById('repoStatus');
+ const publish=document.getElementById('repoPublishBtn');
+ const refresh=document.getElementById('repoRefreshBtn');
+ const newModel=document.getElementById('repoNewModelBtn');
+ const pdfBtn=document.getElementById('repoPdfBtn');
+ if(!editor||!status)return;
+ const dr=Number(answers.q137_repository_choice||0);
+ const published=!!answers.q137_repository_published;
+ editor.value=(published&&answers.q137_repository_final_text)?answers.q137_repository_final_text:(answers.q137_repository_text||'');
+ editor.disabled=published;
+ if(publish)publish.disabled=published||!dr;
+ if(refresh)refresh.disabled=published||!dr;
+ if(newModel){
+  newModel.style.display=(!published&&dr===8)?'inline-flex':'none';
+  newModel.disabled=published||dr!==8;
+ }
+ if(pdfBtn)pdfBtn.style.display=published?'inline-flex':'none';
+ status.classList.toggle('repo-published',published);
+ status.textContent=published
+  ? 'PUBLICADA — '+repositoryChoiceTitle(dr)+' — conteúdo bloqueado para edição.'
+  : (dr
+      ? repositoryChoiceTitle(dr)+(answers.q137_repository_custom_model?' — novo modelo personalizado em edição.':' — texto editável até a publicação.')
+      : 'Selecione DR1 a DR8.');
+}
+function openDecisionRepository(){
+ // Roteiro LFS(7): ao gerar/abrir a Decisão – Repositório, o relógio para automaticamente.
+ stopHearingTimerForDocument('decisao_repositorio');
+ const modal=document.getElementById('repoModal');
+ if(!modal)return;
+ renderRepositoryChoices();
+ syncRepositoryEditor();
+ const editor=document.getElementById('repoEditor');
+ if(editor)editor.oninput=e=>{
+  if(!answers.q137_repository_published)answers.q137_repository_text=e.target.value;
+ };
+ modal.classList.add('open');
+}
+function closeDecisionRepository(){
+ const modal=document.getElementById('repoModal');
+ if(modal)modal.classList.remove('open');
+}
+function selectRepositoryModel(dr){
+ if(answers.q137_repository_published)return;
+ answers.q137_repository_choice=Number(dr);
+ answers.q137_repository_custom_model=false;
+ const decisionMap={
+  1:'Homologo a prisão e converto em preventiva',
+  2:'Relaxo a prisão',
+  3:'Homologo e concedo a liberdade com cautelares e fiança',
+  4:'Homologo e concedo a liberdade com cautelares, sem fiança',
+  5:'Homologo a prisão e mantenho a prisão decretada',
+  6:'Homologo a prisão e revogo a prisão decretada anteriormente',
+  7:'Homologo a prisão civil e revogo a prisão, uma vez comprovado o pagamento do valor do mandado',
+  8:'Profiro outra decisão'
+ };
+ if(decisionMap[Number(dr)])answers.q126=decisionMap[Number(dr)];
+ answers.q137_repository_text=composeRepositoryDecision(dr);
+ const editor=document.getElementById('repoEditor');
+ if(editor){
+  editor.value=answers.q137_repository_text;
+  editor.oninput=e=>{
+   if(!answers.q137_repository_published)answers.q137_repository_text=e.target.value;
+  };
+ }
+ renderRepositoryChoices();
+ syncRepositoryEditor();
+ update();
+}
+
+function includeNewRepositoryModel(){
+ if(answers.q137_repository_published){
+  alert('A decisão já foi publicada e não pode mais ser alterada.');
+  return;
+ }
+ const dr=Number(answers.q137_repository_choice||0);
+ if(dr!==8){
+  alert('A inclusão de novo modelo está disponível na opção DR8 — Profiro outra decisão.');
+  return;
+ }
+
+ const report=repositoryReportText();
+ const participants=repositoryParticipantsText().trim();
+ const customBody=[
+  'PROFIRO OUTRA DECISÃO.',
+  '',
+  '[INCLUA AQUI O NOVO MODELO DE DECISÃO. O TEXTO É LIVREMENTE EDITÁVEL ATÉ A PUBLICAÇÃO.]'
+ ].join('\n');
+
+ answers.q137_repository_custom_model=true;
+ answers.q137_repository_text=[report,customBody,participants].filter(Boolean).join('\n\n');
+
+ const editor=document.getElementById('repoEditor');
+ if(editor){
+  editor.value=answers.q137_repository_text;
+  editor.focus();
+  const marker='[INCLUA AQUI O NOVO MODELO DE DECISÃO. O TEXTO É LIVREMENTE EDITÁVEL ATÉ A PUBLICAÇÃO.]';
+  const pos=editor.value.indexOf(marker);
+  if(pos>=0)editor.setSelectionRange(pos,pos+marker.length);
+ }
+ syncRepositoryEditor();
+ update();
+}
+
+function reloadRepositoryModel(){
+ const dr=Number(answers.q137_repository_choice||0);
+ if(!dr||answers.q137_repository_published)return;
+ if(!confirm('Recarregar o modelo substituirá as edições ainda não publicadas. Deseja continuar?'))return;
+ answers.q137_repository_custom_model=false;
+ answers.q137_repository_text=composeRepositoryDecision(dr);
+ const editor=document.getElementById('repoEditor');
+ if(editor)editor.value=answers.q137_repository_text;
+ syncRepositoryEditor();
+ update();
+}
+async function copyRepositoryDecision(){
+ const text=(document.getElementById('repoEditor')?.value||answers.q137_repository_text||'');
+ if(!text)return;
+ try{await navigator.clipboard.writeText(text)}catch(e){}
+}
+
+function pdfWinAnsiBytes(str){
+ const map={
+  '€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,'‡':135,'ˆ':136,'‰':137,
+  'Š':138,'‹':139,'Œ':140,'Ž':142,'‘':145,'’':146,'“':147,'”':148,'•':149,
+  '–':150,'—':151,'˜':152,'™':153,'š':154,'›':155,'œ':156,'ž':158,'Ÿ':159
+ };
+ const out=[];
+ for(const ch of String(str||'')){
+  const cp=ch.codePointAt(0);
+  if(map[ch]!==undefined)out.push(map[ch]);
+  else if(cp<=255)out.push(cp);
+  else out.push(63);
+ }
+ return out;
+}
+function pdfEscapeWinAnsi(str){
+ let s='';
+ for(const b of pdfWinAnsiBytes(str)){
+  if(b===40||b===41||b===92)s+='\\'+String.fromCharCode(b);
+  else if(b<32||b>126)s+='\\'+b.toString(8).padStart(3,'0');
+  else s+=String.fromCharCode(b);
+ }
+ return s;
+}
+function wrapPdfText(text,maxChars=92){
+ const paragraphs=String(text||'').replace(/\r/g,'').split('\n');
+ const lines=[];
+ for(const paragraph of paragraphs){
+  if(!paragraph.trim()){lines.push('');continue}
+  const words=paragraph.split(/\s+/);
+  let line='';
+  for(const w of words){
+   const candidate=line?line+' '+w:w;
+   if(candidate.length<=maxChars)line=candidate;
+   else{
+    if(line)lines.push(line);
+    if(w.length<=maxChars)line=w;
+    else{
+     let rest=w;
+     while(rest.length>maxChars){lines.push(rest.slice(0,maxChars));rest=rest.slice(maxChars)}
+     line=rest;
+    }
+   }
+  }
+  if(line)lines.push(line);
+ }
+ return lines;
+}
+function buildRepositoryPdfBlob(text){
+ const lines=wrapPdfText(text,92);
+ const perPage=55;
+ const pages=[];
+ for(let i=0;i<lines.length;i+=perPage)pages.push(lines.slice(i,i+perPage));
+ if(!pages.length)pages.push(['']);
+
+ const objects={};
+ const pageIds=[];
+ const contentIds=[];
+ for(let i=0;i<pages.length;i++){
+  pageIds.push(4+i*2);
+  contentIds.push(5+i*2);
+ }
+ objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
+ objects[2]='<< /Type /Pages /Kids ['+pageIds.map(id=>id+' 0 R').join(' ')+'] /Count '+pages.length+' >>';
+ objects[3]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+
+ pages.forEach((pageLines,i)=>{
+  const pid=pageIds[i],cid=contentIds[i];
+  const commands=['BT','/F1 10 Tf','50 792 Td','12 TL'];
+  pageLines.forEach((line,j)=>{
+   if(j>0)commands.push('T*');
+   commands.push('('+pdfEscapeWinAnsi(line)+') Tj');
+  });
+  commands.push('ET');
+  const stream=commands.join('\n');
+  objects[cid]='<< /Length '+pdfWinAnsiBytes(stream).length+' >>\nstream\n'+stream+'\nendstream';
+  objects[pid]='<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents '+cid+' 0 R >>';
+ });
+
+ const maxId=Math.max(...Object.keys(objects).map(Number));
+ let binary='%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+ const offsets=[0];
+ for(let id=1;id<=maxId;id++){
+  offsets[id]=pdfWinAnsiBytes(binary).length;
+  binary+=id+' 0 obj\n'+objects[id]+'\nendobj\n';
+ }
+ const xrefOffset=pdfWinAnsiBytes(binary).length;
+ binary+='xref\n0 '+(maxId+1)+'\n0000000000 65535 f \n';
+ for(let id=1;id<=maxId;id++){
+  binary+=String(offsets[id]).padStart(10,'0')+' 00000 n \n';
+ }
+ binary+='trailer\n<< /Size '+(maxId+1)+' /Root 1 0 R >>\nstartxref\n'+xrefOffset+'\n%%EOF';
+
+ return new Blob([new Uint8Array(pdfWinAnsiBytes(binary))],{type:'application/pdf'});
+}
+function openRepositoryPdfText(text){
+ const blob=buildRepositoryPdfBlob(text);
+ const url=URL.createObjectURL(blob);
+ const win=window.open(url,'_blank','noopener');
+ if(!win){
+  const a=document.createElement('a');
+  a.href=url;
+  a.target='_blank';
+  a.rel='noopener';
+  a.click();
+ }
+ setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
+
+
+
+function getPublishedDecisionText(){
+ let text=String(answers.q137_repository_final_text||'').trim();
+
+ if(!text){
+  try{
+   const stored=JSON.parse(localStorage.getItem('acig_decisao_publicada')||'null');
+   if(stored&&stored.text){
+    text=String(stored.text).trim();
+    answers.q137_repository_final_text=text;
+    answers.q137_repository_published=true;
+    answers.q137_repository_published_at=stored.published_at||answers.q137_repository_published_at||null;
+    answers.q137_repository_final_name='Decisão Publicada';
+   }
+  }catch(e){}
+ }
+
+ // Recuperação de compatibilidade para sessões anteriores:
+ // se já houve publicação mas a cópia final não foi gravada,
+ // usa o último texto efetivamente mantido pelo Repositório.
+ if(!text&&answers.q137_repository_published&&answers.q137_repository_text){
+  text=String(answers.q137_repository_text).trim();
+  if(text){
+   answers.q137_repository_final_text=text;
+   answers.q137_repository_final_name='Decisão Publicada';
+   try{
+    localStorage.setItem('acig_decisao_publicada',JSON.stringify({
+     text,
+     published_at:answers.q137_repository_published_at||new Date().toISOString()
+    }));
+   }catch(e){}
+  }
+ }
+ return text;
+}
+
+function protectPublishedDecision(){
+ const holder=document.getElementById('publishedDecisionText');
+ if(!holder||holder.dataset.protected==='1')return;
+ holder.dataset.protected='1';
+ holder.setAttribute('contenteditable','false');
+ holder.setAttribute('aria-readonly','true');
+
+ // Bloqueia qualquer tentativa de alteração por teclado/colar/arrastar sem impedir seleção e cópia.
+ holder.addEventListener('beforeinput',e=>e.preventDefault());
+ holder.addEventListener('paste',e=>e.preventDefault());
+ holder.addEventListener('drop',e=>e.preventDefault());
+ holder.addEventListener('keydown',e=>{
+  const allowed=(e.ctrlKey||e.metaKey)&&['a','c'].includes(e.key.toLowerCase());
+  const navigation=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','PageUp','PageDown','Home','End','Tab','Escape'];
+  if(!allowed&&!navigation.includes(e.key))e.preventDefault();
+ });
+}
+
+function syncPublishedDecisionButton(){
+ protectPublishedDecision();
+ const hasPublished=!!getPublishedDecisionText();
+
+ // Conforme o roteiro LFS(5), "Decisão Publicada" existe somente dentro da ferramenta
+ // (item 138 da etapa 12), e não na barra inferior.
+ const cardBtn=document.querySelector('#card_q137_publicada button');
+ if(cardBtn){
+  cardBtn.disabled=!hasPublished;
+  cardBtn.title=hasPublished?'Abrir a decisão definitivamente publicada':'Publique primeiro uma Decisão – Repositório';
+ }
+}
+
+
+function advanceToPublishedDecision(){
+ const publishedField=schema.fields.find(f=>f.id==='q137_publicada');
+ if(publishedField){
+  const sectionIndex=schema.sections.findIndex(s=>s.id===publishedField.section);
+  if(sectionIndex>=0){
+   current=sectionIndex;
+   document.querySelectorAll('.stage').forEach((x,j)=>x.classList.toggle('active',j===current));
+   document.querySelectorAll('.step').forEach((x,j)=>x.classList.toggle('active',j===current));
+   currentName.textContent=schema.sections[current].title;
+  }
+ }
+
+ closeDecisionRepository();
+ update();
+
+ // Abre primeiro o documento definitivo. O destaque visual ocorre em seguida.
+ openPublishedDecision();
+
+ requestAnimationFrame(()=>{
+  const cardEl=document.getElementById('card_q137_publicada');
+  if(cardEl){
+   cardEl.classList.add('pending-focus');
+   setTimeout(()=>cardEl.classList.remove('pending-focus'),1600);
+  }
+ });
+}
+
+function openPublishedDecision(){
+ const finalText=getPublishedDecisionText();
+ if(!finalText){
+  alert('Ainda não existe uma Decisão Publicada nesta audiência. Publique primeiro o texto dentro de “Decisão – Repositório”.');
+  return;
+ }
+ const modal=document.getElementById('publishedDecisionModal');
+ const text=document.getElementById('publishedDecisionText');
+
+ if(text){
+  // textContent impede qualquer interpretação HTML e mantém o conteúdo absolutamente não editável.
+  text.textContent=finalText;
+  text.setAttribute('aria-readonly','true');
+  text.setAttribute('contenteditable','false');
+  text.scrollTop=0;
+ }
+
+ if(modal){
+  modal.classList.add('open');
+  requestAnimationFrame(()=>{
+   if(text)text.focus({preventScroll:true});
+  });
+ }
+}
+
+function closePublishedDecision(){
+ const modal=document.getElementById('publishedDecisionModal');
+ if(modal)modal.classList.remove('open');
+}
+
+async function copyPublishedDecision(){
+ const text=getPublishedDecisionText();
+ if(!text)return;
+
+ try{
+  await navigator.clipboard.writeText(text);
+  alert('Decisão Publicada copiada.');
+  return;
+ }catch(e){}
+
+ const holder=document.getElementById('publishedDecisionText');
+ if(holder){
+  const range=document.createRange();
+  range.selectNodeContents(holder);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try{
+   document.execCommand('copy');
+   alert('Decisão Publicada copiada.');
+  }catch(e){}
+  sel.removeAllRanges();
+ }
+}
+
+function openPublishedDecisionPDF(){
+ const text=getPublishedDecisionText();
+ if(!text){
+  alert('Não existe decisão publicada.');
+  return;
+ }
+ openRepositoryPdfText(text);
+}
+
+function openPublishedRepositoryPDF(){
+ const text=getPublishedDecisionText();
+ if(!text){
+  alert('A decisão ainda não foi publicada.');
+  return;
+ }
+ openRepositoryPdfText(text);
+}
+
+function publishRepositoryDecision(){
+ // A publicação da Decisão – Repositório é autônoma.
+ // As pendências gerais continuam sendo controladas para a decisão automática e para a ata,
+ // mas não impedem que o magistrado publique um texto já escolhido e editado no Repositório.
+ const dr=Number(answers.q137_repository_choice||0);
+ if(!dr){alert('Selecione um modelo DR1 a DR8.');return}
+ const editor=document.getElementById('repoEditor');
+ answers.q137_repository_text=(editor?.value||answers.q137_repository_text||'').trim();
+ if(!answers.q137_repository_text){alert('O texto da decisão está vazio.');return}
+ if(!confirm('Publicar a decisão? Após a publicação, o texto não poderá mais ser editado.'))return;
+ const finalPublishedText=String(answers.q137_repository_text||'').trim();
+
+ // Congelamento definitivo do conteúdo exatamente como estava no editor ao clicar em Publicar.
+ answers.q137_repository_published=true;
+ answers.q137_repository_published_at=new Date().toISOString();
+ answers.q137_repository_document_title='Ata de audiência de custódia ACI-G';
+ answers.q137_repository_final_text=finalPublishedText;
+ answers.q137_repository_final_name='Decisão Publicada';
+
+ // Persistência dedicada e independente da sessão.
+ // Isso garante que a Decisão Publicada exista mesmo se houver qualquer ruído na renderização geral.
+ try{
+  localStorage.setItem('acig_decisao_publicada',JSON.stringify({
+   text:finalPublishedText,
+   published_at:answers.q137_repository_published_at,
+   process:answers.q2||'',
+   custodian:answers.q31_text||''
+  }));
+ }catch(e){}
+
+ if(!ended){ended=new Date();}
+
+ try{
+  localStorage.setItem('acig_roteiro_integral',JSON.stringify({
+   answers,
+   inicio:started?started.toISOString():null,
+   fim:ended?ended.toISOString():null
+  }));
+ }catch(e){}
+
+ renderRepositoryChoices();
+ syncRepositoryEditor();
+ syncPublishedDecisionButton();
+ update();
+
+ // Fluxo obrigatório: fechar o Repositório e abrir imediatamente a Decisão Publicada.
+ closeDecisionRepository();
+ update();
+ syncPublishedDecisionButton();
+ openPublishedDecision();
+}
+
+function generateBNMPReport(){
+ const selected=schema.fields.filter(f=>f.bnmp&&visible(f)&&has(answers[f.id])&&f.type!=='action');
+ const lines=['RELATÓRIO SEPARADO PARA PREENCHIMENTO DO BNMP','Processo: '+(answers.q2||'[não informado]'),'Gerado em: '+new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}),''];
+ if(!selected.length){lines.push('Nenhuma variável marcada para o BNMP foi preenchida.')}
+ else{
+  schema.sections.forEach(s=>{
+   const group=selected.filter(f=>f.section===s.id);
+   if(group.length){lines.push(s.title.toUpperCase());group.forEach(f=>lines.push(f.n+'. '+f.label+': '+valueText(answers[f.id])));lines.push('')}
+  })
+ }
+ showOutput('Relatório BNMP',lines.join('\n'))
+}
+function generateReport(){showOutput('Relatório estruturado',reportLines().join('\n'))}
+
+function dispositivoPrimeiraPessoa(tipo){
+ const map={
+  'Homologo a prisão e converto em preventiva':'Homologo a prisão em flagrante e converto-a em prisão preventiva.',
+  'Relaxo a prisão':'Relaxo a prisão e determino a imediata expedição do alvará de soltura, salvo se por outro motivo a pessoa custodiada deva permanecer presa.',
+  'Homologo e concedo a liberdade com cautelares e fiança':'Homologo a prisão em flagrante e concedo liberdade provisória, mediante o cumprimento das medidas cautelares fixadas e o recolhimento da fiança.',
+  'Homologo e concedo a liberdade com cautelares, sem fiança':'Homologo a prisão em flagrante e concedo liberdade provisória, sem fiança, mediante o cumprimento das medidas cautelares fixadas.',
+  'Homologo a prisão e mantenho a prisão decretada':'Homologo a apresentação e mantenho a prisão anteriormente decretada.',
+  'Homologo a prisão e revogo a prisão decretada anteriormente':'Homologo a prisão e revogo a prisão anteriormente decretada, determinando a imediata expedição do alvará de soltura, salvo se por outro motivo a pessoa custodiada deva permanecer presa.',
+  'Homologo a prisão civil e revogo a prisão, uma vez comprovado o pagamento do valor do mandado':'Homologo a apresentação e revogo a prisão civil, diante da comprovação do pagamento do valor indicado no mandado.',
+  'Profiro outra decisão':'Profiro outra decisão, nos termos da fundamentação individualizada.'
+ };
+ if(tipo==='Profiro outra decisão'&&has(answers.q126_outra_decisao))return String(answers.q126_outra_decisao).trim();
+ return map[tipo]||('Profiro a seguinte decisão: '+String(tipo||'não informada')+'.');
+}
+function comandosProvidencias(){
+ const out=[];
+ const comunicacoes=Array.isArray(answers.q127)?answers.q127:[];
+ comunicacoes.forEach(item=>{
+  const map={
+   'Corregedoria da Polícia':'Determino que seja oficiada a Corregedoria da Polícia.',
+   'Corregedoria da Policia':'Determino que seja oficiada a Corregedoria da Polícia.',
+   'Conselho Regional de Medicina':'Determino que seja oficiado o Conselho Regional de Medicina.',
+   'Ministério Público — controle externo da polícia':'Determino que seja oficiado o Ministério Público, para atuação no controle externo da atividade policial.',
+   'Ministério Público Controle Externo da Policia':'Determino que seja oficiado o Ministério Público, para atuação no controle externo da atividade policial.',
+   'Comissão de Direitos Humanos':'Determino que seja oficiada a Comissão de Direitos Humanos.',
+   'Não comunicou':'Registro que não houve comunicação a órgão externo.',
+   'Não existe irregularidade':'Registro que não foram identificadas irregularidades a serem comunicadas.'
+  };
+  if(item==='Outro órgão'&&has(answers.q127_outro_orgao))out.push('Determino que seja oficiado o seguinte órgão: '+String(answers.q127_outro_orgao).trim()+'.');
+  else out.push(map[item]||('Determino que seja oficiado o órgão competente para a seguinte providência: '+item+'.'));
+ });
+ const encaminhamentos=Array.isArray(answers.q128)?answers.q128:[];
+ encaminhamentos.forEach(item=>{
+  const map={
+   'Comunidade terapêutica':'Determino o encaminhamento da pessoa custodiada à comunidade terapêutica indicada.',
+   'Consulta médica':'Determino o encaminhamento da pessoa custodiada para consulta médica.',
+   'Hospital psiquiátrico':'Determino o encaminhamento da pessoa custodiada ao hospital psiquiátrico competente.',
+   'Frequentar palestras':'Determino que a pessoa custodiada frequente as palestras indicadas.',
+   'Novo exame de corpo de delito':'Determino a realização de novo exame de corpo de delito.',
+   'Nada fez':'Registro que não houve encaminhamento adicional.'
+  };
+  if(item==='Outro encaminhamento'&&has(answers.q128_outro_encaminhamento))out.push('Determino o seguinte encaminhamento: '+String(answers.q128_outro_encaminhamento).trim()+'.');
+  else out.push(map[item]||('Determino o seguinte encaminhamento: '+item+'.'));
+ });
+ return out;
+}
+function generateDecision(){
+ const missing=requiredPendingFields();
+ if(missing.length){
+  pendingCursor=-1;
+  goToNextPending();
+  alert('Existem '+missing.length+' pendência(s) obrigatória(s). A ACI-G levou você ao primeiro item faltante. Conclua as pendências antes de gerar a decisão final.');
+  return;
+ }
+if(!answers.q126)return alert('Selecione o tipo de decisão judicial no item 132.');const idx=(schema.fields.find(f=>f.id==='q126').options||[]).indexOf(answers.q126)+1;const foundation=answers['q126_f'+idx]||'';if(!foundation)return alert('Preencha o espaço de fundamentação correspondente à decisão selecionada.');let l=['DECISÃO JUDICIAL — ACI-G','Processo: '+(answers.q2||'[não informado]'),'IGAC da audiência: '+calculateIGAC().toFixed(1).replace('.',',')+'% ('+calculateIGACDetails().points+'/'+calculateIGACDetails().total+' garantias aplicáveis; '+calculateIGACDetails().answered+' verificações respondidas)','\nI — RELATÓRIO'];reportLines().slice(1).forEach(x=>l.push(x));l.push('\nII — FUNDAMENTAÇÃO','Decisão selecionada: '+answers.q126+'.',foundation);if(String(answers.q126).includes('preventiva'))l.push('Fundamentos cautelares a serem individualizados pelo magistrado: ordem pública; ordem econômica; conveniência da instrução criminal; aplicação da lei penal.','Insira na revisão final os fatos concretos, contemporâneos e a razão da insuficiência das cautelares diversas.');else if(String(answers.q126).includes('Relaxou'))l.push('A prisão é relaxada em razão da ilegalidade concretamente reconhecida, a ser individualizada na revisão final.');else if(String(answers.q126).includes('liberdade'))l.push('Não se mostram presentes os requisitos da prisão preventiva, observadas as cautelares e a fiança selecionadas, quando cabíveis.');l.push('\nIII — DISPOSITIVO',dispositivoPrimeiraPessoa(answers.q126));
+const comandos=comandosProvidencias();if(comandos.length)comandos.forEach(c=>l.push(c));if(answers.q129_alvara==='Sim')l.push('Determino a expedição do alvará, pelo seguinte motivo: '+(answers.q129_alvara_motivo||'[não informado]')+'.');else if(answers.q129_alvara==='Sim — Alvará com mandado de monitoramento eletrônico')l.push('Determino a expedição do alvará com mandado de monitoramento eletrônico, pelo seguinte motivo: '+(answers.q129_alvara_monitor_motivo||'[não informado]')+'.');else if(answers.q129_alvara==='Não'&&answers.q132_1_mandado){const mandadoMap={'Mandado de prisão':'Determino a expedição de mandado de prisão.','Mandado de prisão domiciliar':'Determino a expedição de mandado de prisão domiciliar.'};l.push(mandadoMap[answers.q132_1_mandado]||('Determino a expedição de '+answers.q132_1_mandado+'.'));}if(started&&!ended)ended=new Date();answers.__audiencia_encerrada=true;update();showOutput('Decisão automática estruturada',l.join('\n')+'\n\nAudiência encerrada automaticamente em: '+new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})+' • Tempo total: '+elapsedText())}
+
+function sentenceJoin(items){
+ const clean=items.filter(Boolean).map(x=>String(x).trim()).filter(Boolean);
+ if(!clean.length)return '';
+ if(clean.length===1)return clean[0];
+ if(clean.length===2)return clean[0]+' e '+clean[1];
+ return clean.slice(0,-1).join(', ')+' e '+clean[clean.length-1];
+}
+function ataValue(v){
+ if(Array.isArray(v)){
+  if(v.length&&typeof v[0]==='object'){
+   return v.map((x,i)=>{
+    const parts=[];
+    if(x.lei)parts.push(x.lei);
+    if(x.tipo)parts.push(x.tipo);
+    if(x.artigo)parts.push('artigo '+x.artigo);
+    if(x.paragrafo)parts.push('§ '+x.paragrafo);
+    if(x.inciso)parts.push('inciso '+x.inciso);
+    if(x.alinea)parts.push('alínea '+x.alinea);
+    return parts.length?parts.join(', '):'';
+   }).filter(Boolean).join('; ');
+  }
+  return v.join(', ');
+ }
+ if(v&&typeof v==='object')return Object.values(v).filter(Boolean).join(', ');
+ return String(v??'');
+}
+function ataFieldSentence(f){
+ if(!f||!visible(f)||!has(answers[f.id])||f.type==='action'||isRelatedTextField(f.id))return '';
+ const val=ataValue(answers[f.id]);
+ if(!val)return '';
+ let txt=f.label.replace(/\?$/,'');
+ const related=relatedTextFields(f.id).map(id=>{
+  const rf=schema.fields.find(x=>x.id===id);
+  return rf&&visible(rf)&&has(answers[id]) ? rf.label+': '+ataValue(answers[id]) : '';
+ }).filter(Boolean);
+ return txt+': '+val+(related.length?' ('+related.join('; ')+')':'');
+}
+function ataSectionText(sectionId, title){
+ const list=schema.fields.filter(f=>f.section===sectionId).map(ataFieldSentence).filter(Boolean);
+ return list.length ? title+': '+sentenceJoin(list)+'.' : '';
+}
+function hearingMinutesText(){
+ const partes=[];
+ partes.push('TERMO DE AUDIÊNCIA DE CUSTÓDIA — ACI-G');
+ const cab=[];
+ if(has(answers.q2))cab.push('processo '+ataValue(answers.q2));
+ if(has(answers.q6))cab.push('Comarca de '+ataValue(answers.q6));
+ if(has(answers.q7))cab.push('unidade judiciária '+ataValue(answers.q7));
+ if(has(answers.q8))cab.push('audiência registrada em '+ataValue(answers.q8));
+ partes.push('Aos dados acima identificados, foi realizada audiência de custódia'+(cab.length?', referente ao '+sentenceJoin(cab):'')+'.');
+
+ const processo=ataSectionText('processo','Quanto aos dados do processo, legislação e tipificação');
+ if(processo)partes.push(processo);
+
+ const estrutura=ataSectionText('estrutura','Quanto à estrutura e ao formato da audiência');
+ if(estrutura)partes.push(estrutura);
+
+ const garantias=ataSectionText('garantias','No tocante às garantias iniciais');
+ if(garantias)partes.push(garantias);
+
+ const qualificacao=ataSectionText('qualificacao','Em relação aos dados pessoais e familiares da pessoa custodiada');
+ if(qualificacao)partes.push(qualificacao);
+
+ const saude=ataSectionText('saude','Quanto à saúde e às vulnerabilidades');
+ if(saude)partes.push(saude);
+
+ const prisao=ataSectionText('prisao','Sobre o momento e as circunstâncias da prisão');
+ if(prisao)partes.push(prisao);
+
+ const violencia=ataSectionText('violencia','Quanto à apuração de violência, maus-tratos e tortura');
+ if(violencia)partes.push(violencia);
+
+ const exame=ataSectionText('exame','Em relação ao exame de corpo de delito e à condução');
+ if(exame)partes.push(exame);
+
+ const delegacia=ataSectionText('delegacia','Quanto à passagem pela delegacia e aos direitos informados');
+ if(delegacia)partes.push(delegacia);
+
+ const partesProc=ataSectionText('partes','No momento destinado às perguntas e manifestações das partes');
+ if(partesProc)partes.push(partesProc);
+
+ const decisaoDados=schema.fields.filter(f=>f.section==='decisao'&&f.id!=='q126'&&!/^q126_f/.test(f.id)&&f.id!=='q126_outra_decisao')
+  .map(ataFieldSentence).filter(Boolean);
+ if(decisaoDados.length)partes.push('Antes do encerramento, ficaram ainda registrados os seguintes dados decisórios e encaminhamentos: '+sentenceJoin(decisaoDados)+'.');
+
+ if(has(answers.q126)){
+  const idx=(schema.fields.find(f=>f.id==='q126').options||[]).indexOf(answers.q126)+1;
+  const foundation=answers['q126_f'+idx]||'';
+  if(foundation)partes.push('Como fundamentos da decisão, consignou-se: '+String(foundation).trim());
+  partes.push('Na parte dispositiva, '+dispositivoPrimeiraPessoa(answers.q126));
+  const comandos=comandosProvidencias();
+  if(comandos.length)partes.push(comandos.join(' '));
+  if(answers.q129_alvara==='Sim')partes.push('Determinou-se a expedição do alvará, pelo seguinte motivo: '+(answers.q129_alvara_motivo||'[não informado]')+'.');
+  else if(answers.q129_alvara==='Sim — Alvará com mandado de monitoramento eletrônico')partes.push('Determinou-se a expedição do alvará com mandado de monitoramento eletrônico, pelo seguinte motivo: '+(answers.q129_alvara_monitor_motivo||'[não informado]')+'.');
+  else if(answers.q129_alvara==='Não'&&answers.q132_1_mandado){
+   const mm={'Mandado de prisão':'Determinou-se a expedição de mandado de prisão.','Mandado de prisão domiciliar':'Determinou-se a expedição de mandado de prisão domiciliar.'};
+   partes.push(mm[answers.q132_1_mandado]||('Determinou-se a expedição de '+answers.q132_1_mandado+'.'));
+  }
+ }
+
+ const tempo=elapsedText();
+ const fim=ended ? ended.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'}) : new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'});
+ partes.push('Nada mais havendo a registrar, encerra-se o presente termo de audiência, com duração registrada de '+tempo+', às '+fim+'.');
+
+ return partes.join('\n\n');
+}
+
+function escapeHTMLText(v){
+ return String(v??'')
+  .replace(/&/g,'&amp;')
+  .replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;')
+  .replace(/'/g,'&#039;');
+}
+function hearingMinutesHTML(){
+ const plain=hearingMinutesText();
+ let safe=escapeHTMLText(plain);
+ safe=safe.split(/\n\s*\n/).map((p,i)=>{
+   const cls=i===0?' class="ata-title"':'';
+   return '<p'+cls+'>'+p.replace(/\n/g,'<br>')+'</p>';
+ }).join('');
+
+ const identities=[
+  {label:'Processo', value:has(answers.q2)?String(answers.q2).trim():''},
+  {label:'Pessoa custodiada', value:has(answers.q31_text)?String(answers.q31_text).trim():''},
+  {label:'Juiz(a)', value:has(answers.q10_nome)?String(answers.q10_nome).trim():''},
+  {label:'Promotor(a) de Justiça', value:has(answers.q18_nome)?String(answers.q18_nome).trim():''},
+  {label:'Defensor(a)', value:has(answers.q19_nome)?String(answers.q19_nome).trim():''}
+ ];
+
+ function highlightLiteral(content,original){
+  if(!original)return content;
+  const escapedOriginal=escapeHTMLText(original);
+  const upper=escapeHTMLText(String(original).toUpperCase());
+  const regexEscaped=escapedOriginal.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return content.replace(
+   new RegExp(regexEscaped,'gi'),
+   '<strong class="ata-highlight">'+upper+'</strong>'
+  );
+ }
+
+ identities.forEach(item=>{
+  safe=highlightLiteral(safe,item.value);
+ });
+
+ // Bloco nominal obrigatório no início do termo. Além de garantir a presença dos nomes,
+ // facilita a conferência visual e mantém todos em NEGRITO e CAIXA ALTA.
+ const available=identities.filter(item=>item.value);
+ if(available.length){
+  const block='<div class="ata-participants">'+available.map(item=>
+   escapeHTMLText(item.label)+': <strong class="ata-highlight">'+
+   escapeHTMLText(String(item.value).toUpperCase())+'</strong>'
+  ).join('<br>')+'</div>';
+
+  const firstClose=safe.indexOf('</p>');
+  safe=firstClose>=0
+   ? safe.slice(0,firstClose+4)+block+safe.slice(firstClose+4)
+   : block+safe;
+ }
+
+ return safe;
+}
+function generateHearingMinutes(){
+ const missing=requiredPendingFields();
+ if(missing.length){
+  pendingCursor=-1;
+  goToNextPending();
+  alert('Existem '+missing.length+' pendência(s) obrigatória(s). A ACI-G levou você ao primeiro item faltante. Conclua as pendências antes de gerar o termo de audiência.');
+  return;
+ }
+
+ // Roteiro LFS(7): o relógio deve parar assim que o termo for gerado.
+ stopHearingTimerForDocument('termo_audiencia');
+
+ const generated=hearingMinutesHTML();
+ answers.q136_minutes_generated_html=generated;
+ answers.q136_minutes_edited_html=generated;
+ answers.q136_minutes_edited_text=hearingMinutesText();
+
+ showEditableHearingMinutes('Termo de audiência — formato de ata',generated);
+}
+
+
+
+
+
+async function copyCurrentOutput(){
+ let text='';
+ if(output.classList.contains('ata-editable')){
+  const clone=output.cloneNode(true);
+  const notice=clone.querySelector('.ata-edit-notice');
+  if(notice)notice.remove();
+  text=clone.innerText||clone.textContent||'';
+ }else{
+  text=output.innerText||output.textContent||'';
+ }
+ try{
+  await navigator.clipboard.writeText(text);
+ }catch(e){
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.position='fixed';
+  ta.style.opacity='0';
+  document.body.appendChild(ta);
+  ta.select();
+  try{document.execCommand('copy')}catch(err){}
+  ta.remove();
+ }
+}
+
+function showEditableHearingMinutes(t,htmlContent){
+ outputTitle.textContent=t;
+ output.classList.add('rich-output','ata-editable');
+ output.setAttribute('contenteditable','true');
+ output.setAttribute('role','textbox');
+ output.setAttribute('aria-multiline','true');
+ output.setAttribute('spellcheck','true');
+
+ output.innerHTML=
+  '<div class="ata-edit-notice" contenteditable="false">'+
+  'TERMO EDITÁVEL — o texto pode ser ajustado antes de ser copiado ou utilizado. '+
+  'O relógio da audiência foi parado automaticamente no momento da geração.'+
+  '</div>'+htmlContent;
+
+ output.oninput=()=>{
+  // Persistir a versão efetivamente editada pelo usuário.
+  const notice=output.querySelector('.ata-edit-notice');
+  const clone=output.cloneNode(true);
+  const cloneNotice=clone.querySelector('.ata-edit-notice');
+  if(cloneNotice)cloneNotice.remove();
+  answers.q136_minutes_edited_html=clone.innerHTML;
+  answers.q136_minutes_edited_text=clone.innerText;
+  try{
+   localStorage.setItem('acig_roteiro_integral',JSON.stringify({
+    answers,
+    inicio:started?started.toISOString():null,
+    fim:ended?ended.toISOString():null
+   }));
+  }catch(e){}
+ };
+
+ outputModal.classList.add('open');
+ requestAnimationFrame(()=>output.focus({preventScroll:true}));
+}
+
+function showOutputHTML(t,htmlContent){
+ outputTitle.textContent=t;
+ output.classList.add('rich-output');
+ output.classList.remove('ata-editable');
+ output.removeAttribute('contenteditable');
+ output.removeAttribute('role');
+ output.removeAttribute('aria-multiline');
+ output.oninput=null;
+ output.innerHTML=htmlContent;
+ outputModal.classList.add('open');
+}
+function showOutput(t,x){
+ outputTitle.textContent=t;
+ output.classList.remove('rich-output','ata-editable');
+ output.removeAttribute('contenteditable');
+ output.removeAttribute('role');
+ output.removeAttribute('aria-multiline');
+ output.oninput=null;
+ output.textContent=x;
+ outputModal.classList.add('open');
+}
+
+function saveLocal(){localStorage.setItem('acig_roteiro_integral',JSON.stringify({answers,inicio:started?started.toISOString():null,fim:ended?ended.toISOString():null}));alert('Sessão salva neste navegador.')}
+function exportJSON(){const b=new Blob([JSON.stringify({produto:'ACI-G — roteiro integral',inicio:started?started.toISOString():null,fim:ended?ended.toISOString():null,respostas:answers},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='acig_'+(answers.q2||'sessao')+'.json';a.click()}
+async function sealSession(){const p=JSON.stringify({answers,inicio:started?started.toISOString():null,fim:ended?ended.toISOString():null}),d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(p)),h=[...new Uint8Array(d)].map(b=>b.toString(16).padStart(2,'0')).join('');showOutput('Lacre de integridade','Sessão lacrada em '+new Date().toLocaleString('pt-BR')+'\nSHA-256: '+h)}
+setInterval(update,1000);build();initializeBrasiliaTime();loadMunicipios();
+</script></body></html>
